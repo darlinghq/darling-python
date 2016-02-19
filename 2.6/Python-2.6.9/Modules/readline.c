@@ -28,8 +28,12 @@
 
 /* GNU readline definitions */
 #undef HAVE_CONFIG_H /* Else readline/chardefs.h includes strings.h */
+#ifdef __APPLE__
+#include <editline/readline.h>
+#else
 #include <readline/readline.h>
 #include <readline/history.h>
+#endif
 
 #ifdef HAVE_RL_COMPLETION_MATCHES
 #define completion_matches(x, y) \

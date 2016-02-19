@@ -950,7 +950,7 @@
 /* #undef TM_IN_SYS_TIME */
 
 /* Define if you want to use MacPython modules on MacOSX in unix-Python. */
-#define USE_TOOLBOX_OBJECT_GLUE 1
+/*#define USE_TOOLBOX_OBJECT_GLUE 1*/
 
 /* Define if a va_list is an array of some kind */
 #define VA_LIST_IS_ARRAY 1

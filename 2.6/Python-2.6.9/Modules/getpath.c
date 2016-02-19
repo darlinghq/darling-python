@@ -118,7 +118,7 @@
 
 #ifndef PYTHONPATH
 #define PYTHONPATH PREFIX "/lib/python" VERSION ":" \
-              EXEC_PREFIX "/lib/python" VERSION "/lib-dynload"
+              EXEC_PREFIX "/lib/python" VERSION "/lib-dynload" SUFFIX
 #endif
 
 #ifndef LANDMARK
@@ -327,7 +327,7 @@ search_for_exec_prefix(char *argv0_path, char *home)
         else
             strncpy(exec_prefix, home, MAXPATHLEN);
         joinpath(exec_prefix, lib_python);
-        joinpath(exec_prefix, "lib-dynload");
+        joinpath(exec_prefix, "lib-dynload" SUFFIX);
         return 1;
     }
 
@@ -344,7 +344,7 @@ search_for_exec_prefix(char *argv0_path, char *home)
     do {
         n = strlen(exec_prefix);
         joinpath(exec_prefix, lib_python);
-        joinpath(exec_prefix, "lib-dynload");
+        joinpath(exec_prefix, "lib-dynload" SUFFIX);
         if (isdir(exec_prefix))
             return 1;
         exec_prefix[n] = '\0';
@@ -354,7 +354,7 @@ search_for_exec_prefix(char *argv0_path, char *home)
     /* Look at configure's EXEC_PREFIX */
     strncpy(exec_prefix, EXEC_PREFIX, MAXPATHLEN);
     joinpath(exec_prefix, lib_python);
-    joinpath(exec_prefix, "lib-dynload");
+    joinpath(exec_prefix, "lib-dynload" SUFFIX);
     if (isdir(exec_prefix))
         return 1;
 
@@ -534,7 +534,7 @@ calculate_path(void)
             fprintf(stderr,
                 "Could not find platform dependent libraries <exec_prefix>\n");
         strncpy(exec_prefix, EXEC_PREFIX, MAXPATHLEN);
-        joinpath(exec_prefix, "lib/lib-dynload");
+        joinpath(exec_prefix, "lib/lib-dynload" SUFFIX);
     }
     /* If we found EXEC_PREFIX do *not* reduce it!  (Yet.) */
 
