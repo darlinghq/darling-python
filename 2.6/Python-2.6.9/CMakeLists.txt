@@ -182,9 +182,9 @@ if (NOT DARLING_NO_EXECUTABLES)
 	set_target_properties(python26exe PROPERTIES OUTPUT_NAME python2.6)
 
 	set(BINARY_PACKAGING_MODE ON)
-	InstallSymlink(/System/Library/Frameworks/Python.framework/Versions/2.6/bin/python2.6 libexec/darling/usr/bin/python2.6)
+	InstallSymlink(../../System/Library/Frameworks/Python.framework/Versions/2.6/bin/python2.6 libexec/darling/usr/bin/python2.6)
 
-	install(TARGETS python26exe DESTINATION libexec/darling/frameworks/Python.framework/Versions/2.6/bin)
+	install(TARGETS python26exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/bin)
 endif(NOT DARLING_NO_EXECUTABLES)
 
 
@@ -198,7 +198,7 @@ function(pymodule modname)
 	set_target_properties("py26_${modname}" PROPERTIES OUTPUT_NAME ${modname})
 	set_target_properties("py26_${modname}" PROPERTIES PREFIX "")
 
-	install(TARGETS "py26_${modname}" DESTINATION libexec/darling/frameworks/Python.framework/Versions/2.6/lib/python2.6/lib-dynload${BITS})
+	install(TARGETS "py26_${modname}" DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/lib-dynload${BITS})
 endfunction(pymodule)
 
 set(sqlite_sources
@@ -284,7 +284,7 @@ target_compile_definitions(py26__sqlite PRIVATE -DMODULE_NAME="sqlite3")
 if (NOT DARLING_NO_EXECUTABLES)
 	function(install_lib subdir)
 		file(GLOB py_files Lib/${subdir}/*.py)
-		install(FILES ${py_files} DESTINATION libexec/darling/frameworks/Python.framework/Versions/2.6/lib/python2.6/${subdir})
+		install(FILES ${py_files} DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/${subdir})
 	endfunction(install_lib)
 
 	install_lib(.)
