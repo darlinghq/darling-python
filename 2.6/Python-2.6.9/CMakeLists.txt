@@ -182,7 +182,7 @@ if (NOT DARLING_NO_EXECUTABLES)
 	set_target_properties(python26exe PROPERTIES OUTPUT_NAME python2.6)
 
 	install(TARGETS python26exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/bin)
-	install(FILES python2.7 DESTINATION libexec/darling/usr/bin)
+	install(FILES python2.6 DESTINATION libexec/darling/usr/bin)
 endif(NOT DARLING_NO_EXECUTABLES)
 
 
