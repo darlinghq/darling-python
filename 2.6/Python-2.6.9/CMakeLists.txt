@@ -181,9 +181,6 @@ if (NOT DARLING_NO_EXECUTABLES)
 	target_link_libraries(python26exe python26)
 	set_target_properties(python26exe PROPERTIES OUTPUT_NAME python2.6)
 
-	set(BINARY_PACKAGING_MODE ON)
-	InstallSymlink(../../System/Library/Frameworks/Python.framework/Versions/2.6/bin/python2.6 libexec/darling/usr/bin/python2.6)
-
 	install(TARGETS python26exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/bin)
 endif(NOT DARLING_NO_EXECUTABLES)
 
