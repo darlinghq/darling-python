@@ -25,6 +25,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "Python.h"
 #include "pymactoolbox.h"
+#ifndef WORDS_BIGENDIAN
+#include <arpa/inet.h>
+#endif /* !WORDS_BIGENDIAN */
 #include <arpa/inet.h>  /* for ntohl, htonl */
 
 
@@ -167,6 +170,9 @@ PyMac_GetOSType(PyObject *v, OSType *pr)
         return 0;
     }
     memcpy((char *)&tmp, PyString_AsString(v), 4);
+#ifndef WORDS_BIGENDIAN
+	*pr = ntohl(*pr);
+#endif /* !WORDS_BIGENDIAN */
     *pr = (OSType)ntohl(tmp);
     return 1;
 }
@@ -176,6 +182,9 @@ PyObject *
 PyMac_BuildOSType(OSType t)
 {
     uint32_t tmp = htonl((uint32_t)t);
+#ifndef WORDS_BIGENDIAN
+	t = htonl(t);
+#endif /* !WORDS_BIGENDIAN */
     return PyString_FromStringAndSize((char *)&tmp, 4);
 }
 
@@ -420,6 +429,7 @@ GLUE_NEW(GWorldPtr, GWorldObj_New, "Carbon.Qdoffs")
 GLUE_CONVERT(GWorldPtr, GWorldObj_Convert, "Carbon.Qdoffs")
 
 #ifndef __LP64__
+#ifndef __LP64__
 GLUE_NEW(Track, TrackObj_New, "Carbon.Qt")
 GLUE_CONVERT(Track, TrackObj_Convert, "Carbon.Qt")
 GLUE_NEW(Movie, MovieObj_New, "Carbon.Qt")
@@ -432,6 +442,7 @@ GLUE_NEW(UserData, UserDataObj_New, "Carbon.Qt")
 GLUE_CONVERT(UserData, UserDataObj_Convert, "Carbon.Qt")
 GLUE_NEW(Media, MediaObj_New, "Carbon.Qt")
 GLUE_CONVERT(Media, MediaObj_Convert, "Carbon.Qt")
+#endif /* !__LP64__ */
 #endif /* !__LP64__ */
 
 GLUE_NEW(Handle, ResObj_New, "Carbon.Res")

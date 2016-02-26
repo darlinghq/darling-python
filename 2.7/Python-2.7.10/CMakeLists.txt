@@ -1,4 +1,4 @@
-project(python26)
+project(python27)
 
 cmake_minimum_required(VERSION 2.4.0)
 
@@ -11,7 +11,7 @@ add_definitions(-DTARGET_OS_MAC=1)
 add_definitions(-D__APPLE__ -D__MACH__ -D__DYNAMIC__)
 add_definitions(-DNDEBUG -DHAVE_NDBM_H -DHAVE_SEM_OPEN -DOBJC2RUNTIME)
 
-add_definitions(-DVERSION="2.6" -DPREFIX="/System/Library/Frameworks/Python.framework/Versions/2.6" -DSUFFIX="${BITS}")
+add_definitions(-DVERSION="2.7" -DPREFIX="/System/Library/Frameworks/Python.framework/Versions/2.7" -DSUFFIX="${BITS}")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdinc -fwrapv -fPIC -ggdb -O0")
 set(CMAKE_SHARED_LINKER_FLAGS "-nodefaultlibs -nostdlib -fPIC -Wl,--version-script=${DARLING_TOP_DIRECTORY}/darwin.map")
@@ -49,6 +49,7 @@ set(python_sources
 	Python/ceval.c
 	Python/codecs.c
 	Python/compile.c
+	Python/dtoa.c
 	Python/dup2.c
 	Python/dynload_next.c
 	Python/errors.c
@@ -61,7 +62,6 @@ set(python_sources
 	Python/getcompiler.c
 	Python/getcopyright.c
 	Python/getcwd.c
-	Python/getmtime.c
 	Python/getopt.c
 	Python/getplatform.c
 	Python/getversion.c
@@ -75,6 +75,7 @@ set(python_sources
 	Python/mystrtoul.c
 	Python/peephole.c
 	Python/pyarena.c
+	Python/pyctype.c
 	Python/pyfpe.c
 	Python/pymath.c
 	Python/pystate.c
@@ -116,6 +117,7 @@ set(python_sources
 	Objects/bufferobject.c
 	Objects/bytearrayobject.c
 	Objects/bytes_methods.c
+	Objects/capsule.c
 	Objects/cellobject.c
 	Objects/classobject.c
 	Objects/cobject.c
@@ -134,6 +136,7 @@ set(python_sources
 	Objects/iterobject.c
 	Objects/listobject.c
 	Objects/longobject.c
+	Objects/memoryobject.c
 	Objects/methodobject.c
 	Objects/moduleobject.c
 	Objects/object.c
@@ -163,26 +166,28 @@ set(python_sources
 	Modules/symtablemodule.c
 	Modules/getbuildinfo.c
 	Modules/xxsubtype.c
+	Modules/_weakref.c
+	Modules/_math.c
 )
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/darling")
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-add_library(python26 SHARED ${python_sources})
-target_link_libraries(python26 system)
-install(TARGETS python26 DESTINATION ${CMAKE_INSTALL_LIBDIR}/darling)
+add_library(python27 SHARED ${python_sources})
+target_link_libraries(python27 system)
+install(TARGETS python27 DESTINATION ${CMAKE_INSTALL_LIBDIR}/darling)
 
 if (NOT DARLING_NO_EXECUTABLES)
 	include(darling_exe)
 	include(InstallSymlink)
 
-	add_darling_executable(python26exe Modules/main.c Modules/python.c)
-	target_link_libraries(python26exe python26)
-	set_target_properties(python26exe PROPERTIES OUTPUT_NAME python2.6)
+	add_darling_executable(python27exe Modules/main.c Modules/python.c)
+	target_link_libraries(python27exe python27)
+	set_target_properties(python27exe PROPERTIES OUTPUT_NAME python2.7)
 
-	install(TARGETS python26exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/bin)
-	install(FILES python2.7 DESTINATION libexec/darling/usr/bin)
+	install(TARGETS python27exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/bin)
+	install(FILES python python2.7 DESTINATION libexec/darling/usr/bin)
 endif(NOT DARLING_NO_EXECUTABLES)
 
 
@@ -191,12 +196,12 @@ function(pymodule modname)
 		set(files ${files} ${f})
 	endforeach(f)
 
-	add_library("py26_${modname}" SHARED ${files})
-	target_link_libraries("py26_${modname}" python26)
-	set_target_properties("py26_${modname}" PROPERTIES OUTPUT_NAME ${modname})
-	set_target_properties("py26_${modname}" PROPERTIES PREFIX "")
+	add_library("py27_${modname}" SHARED ${files})
+	target_link_libraries("py27_${modname}" python27)
+	set_target_properties("py27_${modname}" PROPERTIES OUTPUT_NAME ${modname})
+	set_target_properties("py27_${modname}" PROPERTIES PREFIX "")
 
-	install(TARGETS "py26_${modname}" DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/lib-dynload${BITS})
+	install(TARGETS "py27_${modname}" DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-dynload${BITS})
 endfunction(pymodule)
 
 set(sqlite_sources
@@ -212,7 +217,7 @@ set(sqlite_sources
 )
 
 pymodule(zlib Modules/zlibmodule.c)
-target_link_libraries(py26_zlib z)
+target_link_libraries(py27_zlib z)
 pymodule(unicodedata Modules/unicodedata.c)
 pymodule(time Modules/timemodule.c)
 pymodule(termios Modules/termios.c)
@@ -221,9 +226,9 @@ pymodule(strop Modules/stropmodule.c)
 pymodule(select Modules/selectmodule.c)
 pymodule(resource Modules/resource.c)
 pymodule(readline Modules/readline.c)
-target_link_libraries(py26_readline ncurses edit)
+target_link_libraries(py27_readline ncurses edit)
 pymodule(pyexpat Modules/pyexpat.c)
-target_link_libraries(py26_pyexpat expat)
+target_link_libraries(py27_pyexpat expat)
 pymodule(parser Modules/parsermodule.c)
 pymodule(operator Modules/operator.c)
 pymodule(nis Modules/nismodule.c)
@@ -242,47 +247,45 @@ pymodule(cmath Modules/cmathmodule.c)
 pymodule(cStringIO Modules/cStringIO.c)
 pymodule(cPickle Modules/cPickle.c)
 pymodule(bz2 Modules/bz2module.c)
-target_link_libraries(py26_bz2 bz2)
+target_link_libraries(py27_bz2 bz2)
 pymodule(bsddb185 Modules/bsddbmodule.c)
 pymodule(binascii Modules/binascii.c)
 pymodule(audioop Modules/audioop.c)
 pymodule(array Modules/arraymodule.c)
 pymodule(_bisect Modules/_bisectmodule.c)
-pymodule(_bytesio Modules/_bytesio.c)
+pymodule(_io Modules/_io/bufferedio.c Modules/_io/bytesio.c Modules/_io/fileio.c Modules/_io/iobase.c Modules/_io/_iomodule.c Modules/_io/stringio.c Modules/_io/textio.c)
 pymodule(_collections Modules/_collectionsmodule.c)
 pymodule(_csv Modules/_csv.c)
 pymodule(_ctypes Modules/_ctypes/callbacks.c Modules/_ctypes/callproc.c Modules/_ctypes/cfield.c Modules/_ctypes/_ctypes.c Modules/_ctypes/malloc_closure.c Modules/_ctypes/stgdict.c Modules/_ctypes/darwin/dlfcn_simple.c)
-target_link_libraries(py26__ctypes ffi)
+target_link_libraries(py27__ctypes ffi)
 pymodule(_ctypes_test Modules/_ctypes/_ctypes_test.c)
 pymodule(_curses_panel Modules/_curses_panel.c)
-target_link_libraries(py26__curses_panel ncurses panel)
+target_link_libraries(py27__curses_panel ncurses panel)
 pymodule(_elementtree Modules/_elementtree.c)
-pymodule(_fileio Modules/_fileio.c)
 pymodule(_functools Modules/_functoolsmodule.c)
 pymodule(_hashlib Modules/_hashopenssl.c)
-target_link_libraries(py26__hashlib ssl098)
+target_link_libraries(py27__hashlib ssl098)
 pymodule(_heapq Modules/_heapqmodule.c)
 pymodule(_hotshot Modules/_hotshot.c)
 pymodule(_json Modules/_json.c)
 pymodule(_locale Modules/_localemodule.c)
-target_link_libraries(py26__locale CFFExtra)
+target_link_libraries(py27__locale CFFExtra)
 pymodule(_lsprof Modules/_lsprof.c)
 pymodule(_multiprocessing Modules/_multiprocessing/multiprocessing.c Modules/_multiprocessing/semaphore.c  Modules/_multiprocessing/socket_connection.c)
 pymodule(_random Modules/_randommodule.c)
 pymodule(_socket Modules/socketmodule.c)
 pymodule(_ssl Modules/_ssl.c)
-target_link_libraries(py26__ssl ssl098)
+target_link_libraries(py27__ssl ssl098)
 pymodule(_struct Modules/_struct.c)
 pymodule(_testcapi Modules/_testcapimodule.c)
-pymodule(_weakref Modules/_weakref.c)
 pymodule(_sqlite ${sqlite_sources})
-target_link_libraries(py26__sqlite sqlite3)
-target_compile_definitions(py26__sqlite PRIVATE -DMODULE_NAME="sqlite3")
+target_link_libraries(py27__sqlite sqlite3)
+target_compile_definitions(py27__sqlite PRIVATE -DMODULE_NAME="sqlite3")
 
 if (NOT DARLING_NO_EXECUTABLES)
 	function(install_lib subdir)
 		file(GLOB py_files Lib/${subdir}/*.py)
-		install(FILES ${py_files} DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/${subdir})
+		install(FILES ${py_files} DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/${subdir})
 	endfunction(install_lib)
 
 	install_lib(.)
@@ -309,6 +312,7 @@ if (NOT DARLING_NO_EXECUTABLES)
 	install_lib(xml/etree)
 	install_lib(xml/parsers)
 	install_lib(xml/sax)
+	install(FILES _sysconfigdata.py DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/)
 endif(NOT DARLING_NO_EXECUTABLES)
 
 

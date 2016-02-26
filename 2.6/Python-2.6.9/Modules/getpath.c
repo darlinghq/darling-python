@@ -7,7 +7,7 @@
 #include <string.h>
 
 #ifdef __APPLE__
-#include <mach-o/dyld.h>
+#include <dlfcn.h>
 #endif
 
 /* Search in some common locations for the associated Python libraries.
@@ -383,9 +383,10 @@ calculate_path(void)
     size_t prefixsz;
     char *defpath = pythonpath;
 #ifdef WITH_NEXT_FRAMEWORK
-    NSModule pythonModule;
+    Dl_info addrinfo;
+    int first_pass = 1;
 #endif
-#ifdef __APPLE__
+#ifdef notdef
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
     uint32_t nsexeclength = MAXPATHLEN;
 #else
@@ -400,7 +401,7 @@ calculate_path(void)
          */
         if (strchr(prog, SEP))
                 strncpy(progpath, prog, MAXPATHLEN);
-#ifdef __APPLE__
+#ifdef notdef
      /* On Mac OS X, if a script uses an interpreter of the form
       * "#!/opt/python2.3/bin/python", the kernel only passes "python"
       * as argv[0], which falls through to the $PATH search below.
@@ -413,7 +414,7 @@ calculate_path(void)
       */
      else if(0 == _NSGetExecutablePath(progpath, &nsexeclength) && progpath[0] == SEP)
        ;
-#endif /* __APPLE__ */
+#endif /* notdef */
         else if (path) {
                 while (1) {
                         char *delim = strchr(path, DELIM);
@@ -452,9 +453,18 @@ calculate_path(void)
         ** which is in the framework, not relative to the executable, which may
         ** be outside of the framework. Except when we're in the build directory...
         */
-    pythonModule = NSModuleForSymbol(NSLookupAndBindSymbol("_Py_Initialize"));
-    /* Use dylib functions to find out where the framework was loaded from */
-    buf = (char *)NSLibraryNameForModule(pythonModule);
+	/* dladdr() now returns the real path of the dylib, instead of the
+	** path of the symlink.  This breaks virtualenv.  To fix this, we
+	** skip using dladdr() during a first pass, and if that fails, then
+	** we go back and do the dladdr().  It turns out that since we moved
+	** Python.app to inside the Python.framework bundle, the call to
+	** search_for_prefix() will now succeed without needing dladdr().
+	** However, virtualenv copies the wrong binary when the prefix is
+	** /usr, so if progpath begins with /usr/bin/, we skip the first pass.
+	*/
+    if (strncmp(progpath, "/usr/bin/", 9) == 0) first_pass = 0;
+return_here_for_second_pass:
+    buf = first_pass ? NULL : (dladdr("_Py_Initialize", &addrinfo) ? (char *)addrinfo.dli_fname : NULL);
     if (buf != NULL) {
         /* We're in a framework. */
         /* See if we might be in the build directory. The framework in the
@@ -507,6 +517,12 @@ calculate_path(void)
     */
 
     if (!(pfound = search_for_prefix(argv0_path, home))) {
+#ifdef WITH_NEXT_FRAMEWORK
+	if (first_pass) {
+	    first_pass = 0;
+	    goto return_here_for_second_pass;
+	}
+#endif
         if (!Py_FrozenFlag)
             fprintf(stderr,
                 "Could not find platform independent libraries <prefix>\n");

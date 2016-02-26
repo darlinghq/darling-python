@@ -131,9 +131,25 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *fqname, const char *shortname,
 
     if (handle == NULL) {
         const char *error = dlerror();
+#ifdef __LP64__
+		char *cp;
+		char *err = NULL;
+#endif /* __LP64__ */
         if (error == NULL)
             error = "unknown dlopen() error";
+#ifdef __LP64__
+		else if ((cp = strstr(error, ": no matching architecture in universal wrapper")) != NULL) {
+			char *p = strchr(error, '\t');
+			if (p && ++p < cp) {
+				asprintf(&err, "%.*s: no appropriate 64-bit architecture (see \"man python\" for running in 32-bit mode)", (cp - p), p);
+				if (err) error = err;
+			}
+		}
+#endif /* __LP64__ */
         PyErr_SetString(PyExc_ImportError, error);
+#ifdef __LP64__
+		if (err) free(err);
+#endif /* __LP64__ */
         return NULL;
     }
     if (fp != NULL && nhandles < 128)

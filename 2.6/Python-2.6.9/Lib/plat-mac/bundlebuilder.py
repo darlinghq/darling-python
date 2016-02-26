@@ -344,7 +344,7 @@ def isFramework():
 
 
 LIB = os.path.join(sys.prefix, "lib", "python" + sys.version[:3])
-SITE_PACKAGES = os.path.join(LIB, "site-packages")
+SITE_PACKAGES = os.path.join("/Library/Python", sys.version[:3], "site-packages")
 
 
 class AppBuilder(BundleBuilder):
@@ -650,7 +650,7 @@ class AppBuilder(BundleBuilder):
             path = mod.__file__
             if path and self.semi_standalone:
                 # skip the standard library
-                if path.startswith(LIB) and not path.startswith(SITE_PACKAGES):
+                if path.startswith(LIB):
                     continue
             if path and mod.__code__ is None:
                 # C extension

@@ -20,5 +20,12 @@ main(int argc, char **argv)
 	m = fpgetmask();
 	fpsetmask(m & ~FP_X_OFL);
 #endif
+	setenv("VERSIONER_PYTHON_VERSION", "@VERSION@", 1);
+#ifdef __LP64__
+	setenv("VERSIONER_PYTHON_PREFER_32_BIT", "no", 1);
+#else /* !__LP64__ */
+	setenv("VERSIONER_PYTHON_PREFER_32_BIT", "yes", 1);
+#endif /* __LP64__ */
+
 	return Py_Main(argc, argv);
 }

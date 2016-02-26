@@ -70,7 +70,7 @@ dl_sym(dlobject *xp, PyObject *args)
         Py_INCREF(Py_None);
         return Py_None;
     }
-    return PyInt_FromLong((long)func);
+    return PyLong_FromLong((long)func);
 }
 
 static PyObject *
@@ -109,6 +109,8 @@ dl_call(dlobject *xp, PyObject *args)
         PyObject *v = PyTuple_GetItem(args, i);
         if (PyInt_Check(v))
             alist[i-1] = PyInt_AsLong(v);
+		else if (PyLong_Check(v))
+			alist[i-1] = PyLong_AsLong(v);
         else if (PyString_Check(v))
             alist[i-1] = (long)PyString_AsString(v);
         else if (v == Py_None)
@@ -123,7 +125,7 @@ dl_call(dlobject *xp, PyObject *args)
         alist[i-1] = 0;
     res = (*func)(alist[0], alist[1], alist[2], alist[3], alist[4],
                   alist[5], alist[6], alist[7], alist[8], alist[9]);
-    return PyInt_FromLong(res);
+    return PyLong_FromLong(res);
 }
 
 static PyMethodDef dlobject_methods[] = {
@@ -164,12 +166,6 @@ dl_open(PyObject *self, PyObject *args)
     char *name;
     int mode;
     PyUnivPtr *handle;
-    if (sizeof(int) != sizeof(long) ||
-        sizeof(long) != sizeof(char *)) {
-        PyErr_SetString(PyExc_SystemError,
- "module dl requires sizeof(int) == sizeof(long) == sizeof(char*)");
-                return NULL;
-    }
 
     if (PyArg_ParseTuple(args, "z:open", &name))
         mode = RTLD_LAZY;

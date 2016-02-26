@@ -1841,33 +1841,33 @@ initselect(void)
     PyModule_AddIntConstant(m, "KQ_EV_ERROR", EV_ERROR);
 
     /* READ WRITE filter flag */
-    PyModule_AddIntConstant(m, "KQ_NOTE_LOWAT", NOTE_LOWAT);
+    PyModule_AddIntConstant(m, "KQ_NOTE_LOWAT", (int)NOTE_LOWAT);
 
     /* VNODE filter flags  */
-    PyModule_AddIntConstant(m, "KQ_NOTE_DELETE", NOTE_DELETE);
-    PyModule_AddIntConstant(m, "KQ_NOTE_WRITE", NOTE_WRITE);
-    PyModule_AddIntConstant(m, "KQ_NOTE_EXTEND", NOTE_EXTEND);
-    PyModule_AddIntConstant(m, "KQ_NOTE_ATTRIB", NOTE_ATTRIB);
-    PyModule_AddIntConstant(m, "KQ_NOTE_LINK", NOTE_LINK);
-    PyModule_AddIntConstant(m, "KQ_NOTE_RENAME", NOTE_RENAME);
-    PyModule_AddIntConstant(m, "KQ_NOTE_REVOKE", NOTE_REVOKE);
+    PyModule_AddIntConstant(m, "KQ_NOTE_DELETE", (int)NOTE_DELETE);
+    PyModule_AddIntConstant(m, "KQ_NOTE_WRITE", (int)NOTE_WRITE);
+    PyModule_AddIntConstant(m, "KQ_NOTE_EXTEND", (int)NOTE_EXTEND);
+    PyModule_AddIntConstant(m, "KQ_NOTE_ATTRIB", (int)NOTE_ATTRIB);
+    PyModule_AddIntConstant(m, "KQ_NOTE_LINK", (int)NOTE_LINK);
+    PyModule_AddIntConstant(m, "KQ_NOTE_RENAME", (int)NOTE_RENAME);
+    PyModule_AddIntConstant(m, "KQ_NOTE_REVOKE", (int)NOTE_REVOKE);
 
     /* PROC filter flags  */
-    PyModule_AddIntConstant(m, "KQ_NOTE_EXIT", NOTE_EXIT);
-    PyModule_AddIntConstant(m, "KQ_NOTE_FORK", NOTE_FORK);
-    PyModule_AddIntConstant(m, "KQ_NOTE_EXEC", NOTE_EXEC);
-    PyModule_AddIntConstant(m, "KQ_NOTE_PCTRLMASK", NOTE_PCTRLMASK);
-    PyModule_AddIntConstant(m, "KQ_NOTE_PDATAMASK", NOTE_PDATAMASK);
+    PyModule_AddIntConstant(m, "KQ_NOTE_EXIT", (int)NOTE_EXIT);
+    PyModule_AddIntConstant(m, "KQ_NOTE_FORK", (int)NOTE_FORK);
+    PyModule_AddIntConstant(m, "KQ_NOTE_EXEC", (int)NOTE_EXEC);
+    PyModule_AddIntConstant(m, "KQ_NOTE_PCTRLMASK", (int)NOTE_PCTRLMASK);
+    PyModule_AddIntConstant(m, "KQ_NOTE_PDATAMASK", (int)NOTE_PDATAMASK);
 
-    PyModule_AddIntConstant(m, "KQ_NOTE_TRACK", NOTE_TRACK);
-    PyModule_AddIntConstant(m, "KQ_NOTE_CHILD", NOTE_CHILD);
-    PyModule_AddIntConstant(m, "KQ_NOTE_TRACKERR", NOTE_TRACKERR);
+    PyModule_AddIntConstant(m, "KQ_NOTE_TRACK", (int)NOTE_TRACK);
+    PyModule_AddIntConstant(m, "KQ_NOTE_CHILD", (int)NOTE_CHILD);
+    PyModule_AddIntConstant(m, "KQ_NOTE_TRACKERR", (int)NOTE_TRACKERR);
 
     /* NETDEV filter flags */
 #ifdef EVFILT_NETDEV
-    PyModule_AddIntConstant(m, "KQ_NOTE_LINKUP", NOTE_LINKUP);
-    PyModule_AddIntConstant(m, "KQ_NOTE_LINKDOWN", NOTE_LINKDOWN);
-    PyModule_AddIntConstant(m, "KQ_NOTE_LINKINV", NOTE_LINKINV);
+    PyModule_AddIntConstant(m, "KQ_NOTE_LINKUP", (int)NOTE_LINKUP);
+    PyModule_AddIntConstant(m, "KQ_NOTE_LINKDOWN", (int)NOTE_LINKDOWN);
+    PyModule_AddIntConstant(m, "KQ_NOTE_LINKINV", (int)NOTE_LINKINV);
 #endif
 
 #endif /* HAVE_KQUEUE */

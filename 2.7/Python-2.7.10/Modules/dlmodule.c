@@ -109,6 +109,8 @@ dl_call(dlobject *xp, PyObject *args)
         PyObject *v = PyTuple_GetItem(args, i);
         if (PyInt_Check(v))
             alist[i-1] = PyInt_AsLong(v);
+		else if (PyLong_Check(v))
+			alist[i-1] = PyLong_AsLong(v);
         else if (PyString_Check(v))
             alist[i-1] = (long)PyString_AsString(v);
         else if (v == Py_None)
@@ -164,12 +166,6 @@ dl_open(PyObject *self, PyObject *args)
     char *name;
     int mode;
     PyUnivPtr *handle;
-    if (sizeof(int) != sizeof(long) ||
-        sizeof(long) != sizeof(char *)) {
-        PyErr_SetString(PyExc_SystemError,
- "module dl requires sizeof(int) == sizeof(long) == sizeof(char*)");
-                return NULL;
-    }
 
     if (PyArg_ParseTuple(args, "z:open", &name))
         mode = RTLD_LAZY;

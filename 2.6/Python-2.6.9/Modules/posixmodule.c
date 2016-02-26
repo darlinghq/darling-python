@@ -1310,8 +1310,8 @@ _pystat_fromstructstat(STRUCT_STAT *st)
     PyStructSequence_SET_ITEM(v, 2, PyInt_FromLong((long)st->st_dev));
 #endif
     PyStructSequence_SET_ITEM(v, 3, PyInt_FromLong((long)st->st_nlink));
-    PyStructSequence_SET_ITEM(v, 4, PyInt_FromLong((long)st->st_uid));
-    PyStructSequence_SET_ITEM(v, 5, PyInt_FromLong((long)st->st_gid));
+    PyStructSequence_SET_ITEM(v, 4, PyInt_FromLong((long)(int)st->st_uid));
+    PyStructSequence_SET_ITEM(v, 5, PyInt_FromLong((long)(int)st->st_gid));
 #ifdef HAVE_LARGEFILE_SUPPORT
     PyStructSequence_SET_ITEM(v, 6,
                               PyLong_FromLongLong((PY_LONG_LONG)st->st_size));
@@ -1897,9 +1897,9 @@ static PyObject *
 posix_chown(PyObject *self, PyObject *args)
 {
     char *path = NULL;
-    long uid, gid;
+    int uid, gid;
     int res;
-    if (!PyArg_ParseTuple(args, "etll:chown",
+    if (!PyArg_ParseTuple(args, "etii:chown",
                           Py_FileSystemDefaultEncoding, &path,
                           &uid, &gid))
         return NULL;
@@ -3836,7 +3836,7 @@ Return the current process's effective group id.");
 static PyObject *
 posix_getegid(PyObject *self, PyObject *noargs)
 {
-    return PyInt_FromLong((long)getegid());
+    return PyInt_FromLong((long)(int)getegid());
 }
 #endif
 
@@ -3849,7 +3849,7 @@ Return the current process's effective user id.");
 static PyObject *
 posix_geteuid(PyObject *self, PyObject *noargs)
 {
-    return PyInt_FromLong((long)geteuid());
+    return PyInt_FromLong((long)(int)geteuid());
 }
 #endif
 
@@ -3862,7 +3862,7 @@ Return the current process's group id.");
 static PyObject *
 posix_getgid(PyObject *self, PyObject *noargs)
 {
-    return PyInt_FromLong((long)getgid());
+    return PyInt_FromLong((long)(int)getgid());
 }
 #endif
 
@@ -4061,7 +4061,7 @@ Return the current process's user id.");
 static PyObject *
 posix_getuid(PyObject *self, PyObject *noargs)
 {
-    return PyInt_FromLong((long)getuid());
+    return PyInt_FromLong((long)(int)getuid());
 }
 #endif
 
@@ -5623,7 +5623,7 @@ static PyObject *
 posix_setuid(PyObject *self, PyObject *args)
 {
     long uid_arg;
-    uid_t uid;
+    int uid;
     if (!PyArg_ParseTuple(args, "l:setuid", &uid_arg))
         return NULL;
     uid = uid_arg;
@@ -5648,7 +5648,7 @@ static PyObject *
 posix_seteuid (PyObject *self, PyObject *args)
 {
     long euid_arg;
-    uid_t euid;
+    int euid;
     if (!PyArg_ParseTuple(args, "l", &euid_arg))
         return NULL;
     euid = euid_arg;
@@ -5674,7 +5674,7 @@ static PyObject *
 posix_setegid (PyObject *self, PyObject *args)
 {
     long egid_arg;
-    gid_t egid;
+    int egid;
     if (!PyArg_ParseTuple(args, "l", &egid_arg))
         return NULL;
     egid = egid_arg;
@@ -5700,7 +5700,7 @@ static PyObject *
 posix_setreuid (PyObject *self, PyObject *args)
 {
     long ruid_arg, euid_arg;
-    uid_t ruid, euid;
+    int ruid, euid;
     if (!PyArg_ParseTuple(args, "ll", &ruid_arg, &euid_arg))
         return NULL;
     if (ruid_arg == -1)
@@ -5734,7 +5734,7 @@ static PyObject *
 posix_setregid (PyObject *self, PyObject *args)
 {
     long rgid_arg, egid_arg;
-    gid_t rgid, egid;
+    int rgid, egid;
     if (!PyArg_ParseTuple(args, "ll", &rgid_arg, &egid_arg))
         return NULL;
     if (rgid_arg == -1)
@@ -5768,7 +5768,7 @@ static PyObject *
 posix_setgid(PyObject *self, PyObject *args)
 {
     long gid_arg;
-    gid_t gid;
+    int gid;
     if (!PyArg_ParseTuple(args, "l:setgid", &gid_arg))
         return NULL;
     gid = gid_arg;
@@ -5824,7 +5824,7 @@ posix_setgroups(PyObject *self, PyObject *groups)
                 }
                 grouplist[i] = x;
                 /* read back to see if it fits in gid_t */
-                if (grouplist[i] != x) {
+                if ((int)grouplist[i] != x) {
                     PyErr_SetString(PyExc_TypeError,
                                     "group id too big");
                     Py_DECREF(elem);
@@ -5834,7 +5834,7 @@ posix_setgroups(PyObject *self, PyObject *groups)
         } else {
             long x  = PyInt_AsLong(elem);
             grouplist[i] = x;
-            if (grouplist[i] != x) {
+            if ((int)grouplist[i] != x) {
                 PyErr_SetString(PyExc_TypeError,
                                 "group id too big");
                 Py_DECREF(elem);
@@ -7601,6 +7601,15 @@ static struct constdef posix_constants_confstr[] = {
 #endif
 #ifdef _MIPS_CS_VENDOR
     {"MIPS_CS_VENDOR",  _MIPS_CS_VENDOR},
+#endif
+#ifdef _CS_DARWIN_USER_DIR
+    {"CS_DARWIN_USER_DIR", _CS_DARWIN_USER_DIR},
+#endif
+#ifdef _CS_DARWIN_USER_TEMP_DIR
+    {"CS_DARWIN_USER_TEMP_DIR", _CS_DARWIN_USER_TEMP_DIR},
+#endif
+#ifdef _CS_DARWIN_USER_CACHE_DIR
+    {"CS_DARWIN_USER_CACHE_DIR", _CS_DARWIN_USER_CACHE_DIR},
 #endif
 };
 

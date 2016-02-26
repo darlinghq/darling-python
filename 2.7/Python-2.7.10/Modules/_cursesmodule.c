@@ -645,7 +645,7 @@ PyCursesWindow_Box(PyCursesWindowObject *self, PyObject *args)
     switch(PyTuple_Size(args)){
     case 0: break;
     default:
-        if (!PyArg_ParseTuple(args,"ll;vertint,horint", &ch1, &ch2))
+        if (!PyArg_ParseTuple(args,"ii;vertint,horint", &ch1, &ch2))
             return NULL;
     }
     box(self->win,ch1,ch2);

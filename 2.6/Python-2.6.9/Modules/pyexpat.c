@@ -1355,8 +1355,10 @@ newxmlparseobject(char *encoding, char *namespace_separator, PyObject *intern)
     else {
         self->itself = XML_ParserCreate(encoding);
     }
+#if ((XML_MAJOR_VERSION >= 2) && (XML_MINOR_VERSION >= 1))
     XML_SetHashSalt(self->itself,
                     (unsigned long)_Py_HashSecret.prefix);
+#endif
     self->intern = intern;
     Py_XINCREF(self->intern);
 #ifdef Py_TPFLAGS_HAVE_GC
