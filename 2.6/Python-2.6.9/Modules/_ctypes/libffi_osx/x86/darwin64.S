@@ -29,6 +29,11 @@
 #include <fficonfig.h>
 #include <ffi.h>
 
+#ifdef DARLING
+#	define _ffi_call_unix64 ffi_call_unix64
+#	define _ffi_closure_unix64 ffi_closure_unix64
+#endif
+
  .file "darwin64.S"
 .text
 
@@ -39,7 +44,7 @@
    for this function.  This has been allocated by ffi_call.  We also
    deallocate some of the stack that has been alloca'd.  */
 
- .align  3
+ .align 8
  .globl  _ffi_call_unix64
 
 _ffi_call_unix64:
@@ -106,53 +111,53 @@ Lstore_table:
  .long Lst_int64-Lstore_table    /* FFI_TYPE_POINTER */
 
  .text
- .align  3
+ .align 8
 Lst_void:
  ret
- .align  3
+ .align 8
 Lst_uint8:
  movzbq  %al, %rax
  movq  %rax, (%rdi)
  ret
- .align  3
+ .align 8
 Lst_sint8:
  movsbq  %al, %rax
  movq  %rax, (%rdi)
  ret
- .align  3
+ .align 8
 Lst_uint16:
  movzwq  %ax, %rax
  movq  %rax, (%rdi)
- .align  3
+ .align 8
 Lst_sint16:
  movswq  %ax, %rax
  movq  %rax, (%rdi)
  ret
- .align  3
+ .align 8
 Lst_uint32:
  movl  %eax, %eax
  movq  %rax, (%rdi)
- .align  3
+ .align 8
 Lst_sint32:
  cltq
  movq  %rax, (%rdi)
  ret
- .align  3
+ .align 8
 Lst_int64:
  movq  %rax, (%rdi)
  ret
- .align  3
+ .align 8
 Lst_float:
  movss %xmm0, (%rdi)
  ret
- .align  3
+ .align 8
 Lst_double:
  movsd %xmm0, (%rdi)
  ret
 Lst_ldouble:
  fstpt (%rdi)
  ret
- .align  3
+ .align 8
 Lst_struct:
  leaq  -20(%rsp), %rsi   /* Scratch area in redzone.  */
 
@@ -183,7 +188,7 @@ Lst_struct:
  /* Many times we can avoid loading any SSE registers at all.
     It's not worth an indirect jump to load the exact set of
     SSE registers needed; zero or all is a good compromise.  */
- .align  3
+ .align 8
 LUW3:
 Lload_sse:
  movdqa  48(%r10), %xmm0
@@ -197,7 +202,7 @@ Lload_sse:
  jmp Lret_from_load_sse
 
 LUW4:
- .align  3
+ .align 8
  .globl  _ffi_closure_unix64
 
 _ffi_closure_unix64:
@@ -219,7 +224,7 @@ Lret_from_save_sse:
  leaq  176(%rsp), %rsi
  movq  %rsp, %rdx
  leaq  208(%rsp), %rcx
- call  _ffi_closure_unix64_inner
+ call  _ffi_closure_unix64_inner@PLT
 
  /* Deallocate stack frame early; return value is now in redzone.  */
  addq  $200, %rsp
@@ -250,38 +255,38 @@ Lload_table:
  .long Lld_int64-Lload_table   /* FFI_TYPE_POINTER */
 
  .text
- .align  3
+ .align 8
 Lld_void:
  ret
- .align  3
+ .align 8
 Lld_int8:
  movzbl  -24(%rsp), %eax
  ret
- .align  3
+ .align 8
 Lld_int16:
  movzwl  -24(%rsp), %eax
  ret
- .align  3
+ .align 8
 Lld_int32:
  movl  -24(%rsp), %eax
  ret
- .align  3
+ .align 8
 Lld_int64:
  movq  -24(%rsp), %rax
  ret
- .align  3
+ .align 8
 Lld_float:
  movss -24(%rsp), %xmm0
  ret
- .align  3
+ .align 8
 Lld_double:
  movsd -24(%rsp), %xmm0
  ret
- .align  3
+ .align 8
 Lld_ldouble:
  fldt  -24(%rsp)
  ret
- .align  3
+ .align 8
 Lld_struct:
  /* There are four possibilities here, %rax/%rdx, %xmm0/%rax,
     %rax/%xmm0, %xmm0/%xmm1.  We collapse two by always loading
@@ -300,7 +305,7 @@ Lld_struct:
  ret
 
  /* See the comment above Lload_sse; the same logic applies here.  */
- .align  3
+ .align 8
 LUW8:
 Lsave_sse:
  movdqa  %xmm0, 48(%rsp)
@@ -314,7 +319,8 @@ Lsave_sse:
  jmp Lret_from_save_sse
 
 LUW9:
-.section __TEXT,__eh_frame,coalesced,no_toc+strip_static_syms+live_support
+//.section __TEXT,__eh_frame,coalesced,no_toc+strip_static_syms+live_support
+.text
 EH_frame1:
  .set  L$set$0,LECIE1-LSCIE1   /* CIE Length */
  .long L$set$0
@@ -332,7 +338,7 @@ LSCIE1:
  .byte 0x8   /* uleb128 0x8 */
  .byte 0x90    /* DW_CFA_offset, column 0x10 */
  .byte 0x1
- .align  3
+ .align 8
 LECIE1:
  .globl _ffi_call_unix64.eh
 _ffi_call_unix64.eh:
@@ -376,7 +382,7 @@ LASFDE1:
  .long L$set$5
  .byte 0xb     /* DW_CFA_restore_state */
 
- .align  3
+ .align 8
 LEFDE1:
  .globl _ffi_closure_unix64.eh
 _ffi_closure_unix64.eh:
@@ -408,8 +414,8 @@ LASFDE3:
  .long L$set$10
  .byte 0xb     /* DW_CFA_restore_state */
 
- .align  3
+ .align 8
 LEFDE3:
- .subsections_via_symbols
+ // .subsections_via_symbols
 
 #endif /* __x86_64__ */
