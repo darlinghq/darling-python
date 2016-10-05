@@ -13,6 +13,7 @@ add_definitions(-D__APPLE__ -D__MACH__ -D__DYNAMIC__ -DMACOSX)
 add_definitions(-DNDEBUG -DHAVE_NDBM_H -DHAVE_SEM_OPEN -DOBJC2RUNTIME)
 
 add_definitions(-DVERSION="2.7" -DPREFIX="/System/Library/Frameworks/Python.framework/Versions/2.7" -DSUFFIX="${BITS}")
+add_definitions(-DPLATFORM="darwin")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdinc -fwrapv -fPIC -ggdb -O0")
 set(CMAKE_SHARED_LINKER_FLAGS "-nodefaultlibs -nostdlib -fPIC -Wl,--version-script=${DARLING_TOP_DIRECTORY}/darwin.map")
