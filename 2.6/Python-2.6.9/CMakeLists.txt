@@ -276,9 +276,13 @@ target_link_libraries(py26__ssl ssl098)
 pymodule(_struct Modules/_struct.c)
 pymodule(_testcapi Modules/_testcapimodule.c)
 pymodule(_weakref Modules/_weakref.c)
+
 pymodule(_sqlite ${sqlite_sources})
 target_link_libraries(py26__sqlite sqlite3)
 target_compile_definitions(py26__sqlite PRIVATE -DMODULE_NAME="sqlite3")
+
+pymodule(_scproxy Mac/Modules/_scproxy.c)
+target_link_libraries(py26__scproxy SystemConfiguration)
 
 if (NOT DARLING_NO_EXECUTABLES)
 	function(install_lib subdir)

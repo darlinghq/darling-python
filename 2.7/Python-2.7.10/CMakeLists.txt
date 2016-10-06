@@ -281,8 +281,12 @@ target_link_libraries(py27__ssl ssl098)
 pymodule(_struct Modules/_struct.c)
 pymodule(_testcapi Modules/_testcapimodule.c)
 pymodule(_sqlite ${sqlite_sources})
+
 target_link_libraries(py27__sqlite sqlite3)
 target_compile_definitions(py27__sqlite PRIVATE -DMODULE_NAME="sqlite3")
+
+pymodule(_scproxy Mac/Modules/_scproxy.c)
+target_link_libraries(py27__scproxy SystemConfiguration)
 
 if (NOT DARLING_NO_EXECUTABLES)
 	function(install_lib subdir)
