@@ -14,6 +14,22 @@ add_definitions(-DNDEBUG -DHAVE_NDBM_H -DHAVE_SEM_OPEN -DOBJC2RUNTIME)
 add_definitions(-DVERSION="2.6" -DPREFIX="/System/Library/Frameworks/Python.framework/Versions/2.6" -DSUFFIX="${BITS}")
 add_definitions(-DPLATFORM="darwin")
 
+add_definitions(
+	-Wno-parentheses
+	-Wno-implicit-function-declaration
+	-Wno-logical-not-parentheses
+	-Wno-tautological-constant-out-of-range-compare
+	-Wno-absolute-value
+	-Wno-pointer-sign
+	-Wno-format-extra-args
+	-Wno-tautological-pointer-compare
+	-Wno-incompatible-pointer-types-discards-qualifiers
+	-Wno-deprecated-declarations
+	-Wno-shift-negative-value
+	-Wno-macro-redefined
+	-Wno-invalid-source-encoding
+)
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdinc -fwrapv -fPIC -ggdb -O0")
 set(CMAKE_SHARED_LINKER_FLAGS "-nodefaultlibs -nostdlib -fPIC -Wl,--version-script=${DARLING_TOP_DIRECTORY}/darwin.map")
 set(CMAKE_EXE_LINKER_FLAGS "-nodefaultlibs -nostdlib -fPIC -Wl,--version-script=${DARLING_TOP_DIRECTORY}/darwin.map")
@@ -167,7 +183,7 @@ set(python_sources
 )
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/darling")
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_library(python26 SHARED ${python_sources})
