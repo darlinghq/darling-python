@@ -81,7 +81,6 @@ set(python_sources
 	Python/getargs.c
 	Python/getcompiler.c
 	Python/getcopyright.c
-	Python/getcwd.c
 	Python/getopt.c
 	Python/getplatform.c
 	Python/getversion.c
