@@ -33,33 +33,33 @@ add_definitions(
 	-Wno-empty-body
 )
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdinc -fwrapv -fPIC -ggdb -O0")
-set(CMAKE_SHARED_LINKER_FLAGS "-nodefaultlibs -nostdlib -fPIC -Wl,--version-script=${DARLING_TOP_DIRECTORY}/darwin.map")
-set(CMAKE_EXE_LINKER_FLAGS "-nodefaultlibs -nostdlib -fPIC -Wl,--version-script=${DARLING_TOP_DIRECTORY}/darwin.map")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdinc -fwrapv -fPIC")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
-include_directories(${DARLING_TOP_DIRECTORY}/src/libc/include/FreeBSD)
-include_directories(${DARLING_TOP_DIRECTORY}/src/libc/include/NetBSD)
-include_directories(${DARLING_TOP_DIRECTORY}/src/libinfo)
-include_directories(${DARLING_TOP_DIRECTORY}/src/libc/gen)
-include_directories(${DARLING_TOP_DIRECTORY}/src/libc/darwin)
-include_directories(${DARLING_TOP_DIRECTORY}/src/libc/stdtime/FreeBSD)
-include_directories(${DARLING_TOP_DIRECTORY}/src/launchd/liblaunch)
-include_directories(${DARLING_TOP_DIRECTORY}/src/external/libdispatch)
-include_directories(${DARLING_TOP_DIRECTORY}/src/external/zlib)
-include_directories(${DARLING_TOP_DIRECTORY}/src/external/bzip2)
-include_directories(${DARLING_TOP_DIRECTORY}/src/external/expat/expat/lib)
-include_directories(${DARLING_TOP_DIRECTORY}/src/ncurses/include)
-include_directories(${DARLING_TOP_DIRECTORY}/src/ncurses/panel)
-include_directories(${DARLING_TOP_DIRECTORY}/src/libedit/src)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/_ctypes/libffi_osx/include)
-include_directories(${DARLING_TOP_DIRECTORY}/src/external/openssl/src/include)
-include_directories(${DARLING_TOP_DIRECTORY}/src/external/corefoundation/Headers)
-include_directories(${CMAKE_BINARY_DIR}/src/external/corefoundation/Headers)
-include_directories(${DARLING_TOP_DIRECTORY}/src/external/foundation/Headers)
-include_directories(${CMAKE_BINARY_DIR}/src/external/foundation/Headers)
-include_directories(${DARLING_TOP_DIRECTORY}/src/external/sqlite)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/Include
+	${CMAKE_SOURCE_DIR}/src/external/libclosure
+	${CMAKE_SOURCE_DIR}/src/libc/include/FreeBSD
+	${CMAKE_SOURCE_DIR}/src/libc/include/NetBSD
+	${CMAKE_SOURCE_DIR}/src/libinfo
+	${CMAKE_SOURCE_DIR}/src/libc/gen
+	${CMAKE_SOURCE_DIR}/src/libc/darwin
+	${CMAKE_SOURCE_DIR}/src/libc/stdtime/FreeBSD
+	${CMAKE_SOURCE_DIR}/src/launchd/liblaunch
+	${CMAKE_SOURCE_DIR}/src/external/libdispatch
+	${CMAKE_SOURCE_DIR}/src/external/zlib
+	${CMAKE_SOURCE_DIR}/src/external/security/include
+	${CMAKE_SOURCE_DIR}/src/external/bzip2
+	${CMAKE_SOURCE_DIR}/src/external/expat/expat/lib
+	${CMAKE_SOURCE_DIR}/src/ncurses/include
+	${CMAKE_SOURCE_DIR}/src/ncurses/panel
+	${CMAKE_SOURCE_DIR}/src/libedit/src
+	${CMAKE_CURRENT_SOURCE_DIR}/Modules/_ctypes/libffi_osx/include
+	${CMAKE_SOURCE_DIR}/src/external/openssl/src/include
+	${CMAKE_SOURCE_DIR}/src/external/corefoundation
+	${CMAKE_SOURCE_DIR}/src/external/foundation/include
+	${CMAKE_SOURCE_DIR}/src/external/sqlite
+	${CMAKE_SOURCE_DIR}/src/external/configd/SystemConfiguration.fproj
+)
 
 set(python_sources
 	Python/asdl.c
@@ -190,38 +190,43 @@ set(python_sources
 	Modules/_math.c
 )
 
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/darling")
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+add_framework(Python
+	FAT
+	CURRENT_VERSION
+	SOURCES
+		${python_sources}
+	VERSION "2.7"
+	DEPENDENCIES
+		system
+)
 
-add_library(python27 SHARED ${python_sources})
-target_link_libraries(python27 system)
-install(TARGETS python27 DESTINATION ${CMAKE_INSTALL_LIBDIR}/darling)
+include(darling_exe)
+include(InstallSymlink)
 
-if (NOT DARLING_NO_EXECUTABLES)
-	include(darling_exe)
-	include(InstallSymlink)
+add_darling_executable(python27exe Modules/main.c Modules/python.c)
+target_link_libraries(python27exe system Python_2.7)
+set_target_properties(python27exe PROPERTIES OUTPUT_NAME python2.7)
+make_fat(python27exe)
 
-	add_darling_executable(python27exe Modules/main.c Modules/python.c)
-	target_link_libraries(python27exe python27)
-	set_target_properties(python27exe PROPERTIES OUTPUT_NAME python2.7)
-
-	install(TARGETS python27exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/bin)
-	install(FILES python python2.7 DESTINATION libexec/darling/usr/bin)
-endif(NOT DARLING_NO_EXECUTABLES)
-
+install(TARGETS python27exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/bin)
+install(FILES python python2.7 DESTINATION libexec/darling/usr/bin)
 
 function(pymodule modname)
 	foreach(f IN LISTS ARGN)
 		set(files ${files} ${f})
 	endforeach(f)
 
-	add_library("py27_${modname}" SHARED ${files})
-	target_link_libraries("py27_${modname}" python27)
-	set_target_properties("py27_${modname}" PROPERTIES OUTPUT_NAME ${modname})
-	set_target_properties("py27_${modname}" PROPERTIES PREFIX "")
+	add_darling_bundle("py27_${modname}" "${CMAKE_CURRENT_BINARY_DIR}/python2.7" ${files})
+	target_link_libraries("py27_${modname}" system)
 
-	install(TARGETS "py27_${modname}" DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-dynload${BITS})
+	set_property(TARGET "py27_${modname}" APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-flat_namespace ")
+	set_target_properties("py27_${modname}" PROPERTIES OUTPUT_NAME ${modname}
+														PREFIX ""
+														SUFFIX ".so")
+	make_fat("py27_${modname}")
+	add_dependencies("py27_${modname}" python27exe)
+
+	install(TARGETS "py27_${modname}" DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-dynload)
 endfunction(pymodule)
 
 set(sqlite_sources
@@ -251,7 +256,7 @@ pymodule(pyexpat Modules/pyexpat.c)
 target_link_libraries(py27_pyexpat expat)
 pymodule(parser Modules/parsermodule.c)
 pymodule(operator Modules/operator.c)
-pymodule(nis Modules/nismodule.c)
+#pymodule(nis Modules/nismodule.c)
 pymodule(mmap Modules/mmapmodule.c)
 pymodule(math Modules/mathmodule.c)
 pymodule(itertools Modules/itertoolsmodule.c)
@@ -261,7 +266,7 @@ pymodule(future_builtins Modules/future_builtins.c)
 pymodule(fcntl Modules/fcntlmodule.c)
 pymodule(dl Modules/dlmodule.c)
 pymodule(dbm Modules/dbmmodule.c)
-pymodule(datetime Modules/datetimemodule.c)
+pymodule(datetime Modules/datetimemodule.c Modules/timemodule.c)
 pymodule(crypt Modules/cryptmodule.c)
 pymodule(cmath Modules/cmathmodule.c)
 pymodule(cStringIO Modules/cStringIO.c)
@@ -282,6 +287,7 @@ pymodule(_ctypes_test Modules/_ctypes/_ctypes_test.c)
 pymodule(_curses_panel Modules/_curses_panel.c)
 target_link_libraries(py27__curses_panel ncurses panel)
 pymodule(_elementtree Modules/_elementtree.c)
+set_target_properties(py27__elementtree PROPERTIES COMPILE_FLAGS "-DUSE_PYEXPAT_CAPI")
 pymodule(_functools Modules/_functoolsmodule.c)
 pymodule(_hashlib Modules/_hashopenssl.c)
 target_link_libraries(py27__hashlib ssl098)
@@ -289,11 +295,11 @@ pymodule(_heapq Modules/_heapqmodule.c)
 pymodule(_hotshot Modules/_hotshot.c)
 pymodule(_json Modules/_json.c)
 pymodule(_locale Modules/_localemodule.c)
-target_link_libraries(py27__locale CFFExtra)
-pymodule(_lsprof Modules/_lsprof.c)
+target_link_libraries(py27__locale CoreFoundation)
+pymodule(_lsprof Modules/_lsprof.c Modules/rotatingtree.c)
 pymodule(_multiprocessing Modules/_multiprocessing/multiprocessing.c Modules/_multiprocessing/semaphore.c  Modules/_multiprocessing/socket_connection.c)
 pymodule(_random Modules/_randommodule.c)
-pymodule(_socket Modules/socketmodule.c)
+pymodule(_socket Modules/socketmodule.c Modules/timemodule.c)
 pymodule(_ssl Modules/_ssl.c)
 target_link_libraries(py27__ssl ssl098)
 pymodule(_struct Modules/_struct.c)
@@ -303,8 +309,8 @@ pymodule(_sqlite ${sqlite_sources})
 target_link_libraries(py27__sqlite sqlite3)
 target_compile_definitions(py27__sqlite PRIVATE -DMODULE_NAME="sqlite3")
 
-pymodule(_scproxy Mac/Modules/_scproxy.c)
-target_link_libraries(py27__scproxy SystemConfiguration)
+#pymodule(_scproxy Mac/Modules/_scproxy.c)
+#target_link_libraries(py27__scproxy SystemConfiguration)
 
 if (NOT DARLING_NO_EXECUTABLES)
 	function(install_lib subdir)
