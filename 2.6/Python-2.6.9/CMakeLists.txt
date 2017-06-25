@@ -34,28 +34,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdinc -fwrapv")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/Include
-	${CMAKE_SOURCE_DIR}/src/external/libclosure
-	${CMAKE_SOURCE_DIR}/src/libc/include/FreeBSD
-	${CMAKE_SOURCE_DIR}/src/libc/include/NetBSD
-	${CMAKE_SOURCE_DIR}/src/libinfo
-	${CMAKE_SOURCE_DIR}/src/libc/gen
-	${CMAKE_SOURCE_DIR}/src/libc/darwin
-	${CMAKE_SOURCE_DIR}/src/libc/stdtime/FreeBSD
-	${CMAKE_SOURCE_DIR}/src/launchd/liblaunch
-	${CMAKE_SOURCE_DIR}/src/external/libdispatch
-	${CMAKE_SOURCE_DIR}/src/external/zlib
-	${CMAKE_SOURCE_DIR}/src/external/security/include
-	${CMAKE_SOURCE_DIR}/src/external/bzip2
-	${CMAKE_SOURCE_DIR}/src/external/expat/expat/lib
-	${CMAKE_SOURCE_DIR}/src/ncurses/include
-	${CMAKE_SOURCE_DIR}/src/ncurses/panel
-	${CMAKE_SOURCE_DIR}/src/libedit/src
 	${CMAKE_CURRENT_SOURCE_DIR}/Modules/_ctypes/libffi_osx/include
-	${CMAKE_SOURCE_DIR}/src/external/openssl/src/include
-	${CMAKE_SOURCE_DIR}/src/external/corefoundation
-	${CMAKE_SOURCE_DIR}/src/external/foundation/include
-	${CMAKE_SOURCE_DIR}/src/external/sqlite
-	${CMAKE_SOURCE_DIR}/src/external/configd/SystemConfiguration.fproj
 )
 
 set(python_sources
