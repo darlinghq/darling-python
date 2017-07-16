@@ -46,7 +46,7 @@ set(python_sources
 	Python/codecs.c
 	Python/compile.c
 	Python/dup2.c
-	Python/dynload_next.c
+	Python/dynload_shlib.c
 	Python/errors.c
 	Python/formatter_string.c
 	Python/formatter_unicode.c
