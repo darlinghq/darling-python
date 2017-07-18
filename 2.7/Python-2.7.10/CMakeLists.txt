@@ -13,7 +13,7 @@ add_definitions(-D__APPLE__ -D__MACH__ -D__DYNAMIC__ -DMACOSX)
 add_definitions(-DNDEBUG -DHAVE_NDBM_H -DHAVE_SEM_OPEN -DOBJC2RUNTIME)
 
 add_definitions(-DVERSION="2.7" -DPREFIX="/System/Library/Frameworks/Python.framework/Versions/2.7" -DSUFFIX="${BITS}")
-add_definitions(-DPLATFORM="darwin")
+add_definitions(-DPLATFORM="darwin" -DPYTHONPATH=":plat-darwin:plat-mac:plat-mac/lib-scriptpackages:lib-tk:lib-old")
 
 add_definitions(
         -Wno-parentheses
@@ -326,6 +326,8 @@ install_lib(xml/dom)
 install_lib(xml/etree)
 install_lib(xml/parsers)
 install_lib(xml/sax)
-install(FILES _sysconfigdata.py DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/)
 
+pyc(py27_sysconfigdata SOURCES _sysconfigdata.py DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7)
+install(FILES _sysconfigdata.py DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/)
+install(FILES Lib/site-packages/README DESTINATION libexec/darling/Library/Python/2.7/site-packages)
 

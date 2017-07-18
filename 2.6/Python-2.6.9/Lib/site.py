@@ -264,6 +264,8 @@ def addsitepackages(known_paths):
 
         if sys.platform in ('os2emx', 'riscos'):
             sitedirs.append(os.path.join(prefix, "Lib", "site-packages"))
+        elif sys.platform == 'darwin' and prefix == sys.prefix:
+            sitedirs.append(os.path.join("/Library/Python", sys.version[:3], "site-packages"))
         elif os.sep == '/':
             sitedirs.append(os.path.join(prefix, "lib",
                                         "python" + sys.version[:3],
