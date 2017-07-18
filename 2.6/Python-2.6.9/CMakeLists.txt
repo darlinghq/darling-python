@@ -291,6 +291,9 @@ target_link_libraries(py26__scproxy SystemConfiguration)
 function(install_lib subdir)
 	file(GLOB py_files Lib/${subdir}/*.py)
 	install(FILES ${py_files} DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/${subdir})
+
+	string(REGEX REPLACE "/" "_" target_name "py26_${subdir}")
+	pyc("${target_name}" SOURCES ${py_files} DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/${subdir})
 endfunction(install_lib)
 
 install_lib(.)

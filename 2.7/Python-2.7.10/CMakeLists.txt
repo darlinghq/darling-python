@@ -297,6 +297,9 @@ target_link_libraries(py27__scproxy SystemConfiguration)
 function(install_lib subdir)
 	file(GLOB py_files Lib/${subdir}/*.py)
 	install(FILES ${py_files} DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/${subdir})
+
+	string(REGEX REPLACE "/" "_" target_name "py27_${subdir}")
+	pyc("${target_name}" SOURCES ${py_files} DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/${subdir})
 endfunction(install_lib)
 
 install_lib(.)
