@@ -184,6 +184,7 @@ unset(DYLIB_CURRENT_VERSION)
 
 include(darling_exe)
 include(InstallSymlink)
+include(versioner)
 
 add_darling_executable(python27exe Modules/main.c Modules/python.c)
 target_link_libraries(python27exe system Python_2.7)
@@ -191,7 +192,9 @@ set_target_properties(python27exe PROPERTIES OUTPUT_NAME python2.7)
 make_fat(python27exe)
 
 install(TARGETS python27exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/bin)
-install(FILES python python2.7 DESTINATION libexec/darling/usr/bin)
+install(FILES python2.7 DESTINATION libexec/darling/usr/bin)
+
+versioner(python "2.6;2.7" "2.7")
 
 function(pymodule modname)
 	foreach(f IN LISTS ARGN)
@@ -330,4 +333,10 @@ install_lib(xml/sax)
 pyc(py27_sysconfigdata SOURCES _sysconfigdata.py DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7)
 install(FILES _sysconfigdata.py DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/)
 install(FILES Lib/site-packages/README DESTINATION libexec/darling/Library/Python/2.7/site-packages)
+install(PROGRAMS ../../fix/dummy.py DESTINATION libexec/darling/usr/bin RENAME xattr)
+install(PROGRAMS ../../fix/dummy.py DESTINATION libexec/darling/usr/bin RENAME python-config)
+
+set(EXENAME "/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Misc/python-config.in python-config)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/python-config DESTINATION libexec/darling/usr/bin RENAME python2.7-config)
 

@@ -323,4 +323,7 @@ install_lib(xml/sax)
 
 install(FILES Lib/site-packages/README DESTINATION libexec/darling/Library/Python/2.6/site-packages)
 
+set(EXENAME "/System/Library/Frameworks/Python.framework/Versions/2.6/bin/python2.6")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Misc/python-config.in python-config)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/python-config DESTINATION libexec/darling/usr/bin RENAME python2.6-config)
 
