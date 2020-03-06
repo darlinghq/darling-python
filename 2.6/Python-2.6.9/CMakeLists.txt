@@ -15,22 +15,11 @@ add_definitions(-DVERSION="2.6" -DPREFIX="/System/Library/Frameworks/Python.fram
 add_definitions(-DPLATFORM="darwin" -DPYTHONPATH=":plat-darwin:plat-mac:plat-mac/lib-scriptpackages:lib-tk:lib-old")
 
 add_definitions(
-	-Wno-parentheses
-	-Wno-implicit-function-declaration
-	-Wno-logical-not-parentheses
-	-Wno-tautological-constant-out-of-range-compare
-	-Wno-absolute-value
-	-Wno-pointer-sign
-	-Wno-format-extra-args
-	-Wno-tautological-pointer-compare
-	-Wno-incompatible-pointer-types-discards-qualifiers
-	-Wno-deprecated-declarations
-	-Wno-shift-negative-value
-	-Wno-macro-redefined
-	-Wno-invalid-source-encoding
+	-w
+	-nostdinc
 )
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdinc -fwrapv")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fwrapv")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/Include
