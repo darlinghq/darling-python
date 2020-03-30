@@ -8,8 +8,7 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 enable_language(C ASM)
-add_definitions(-DTARGET_OS_MAC=1)
-add_definitions(-D__APPLE__ -D__MACH__ -D__DYNAMIC__ -DMACOSX)
+add_definitions(-DMACOSX)
 add_definitions(-DNDEBUG -DHAVE_NDBM_H -DHAVE_SEM_OPEN -DOBJC2RUNTIME)
 
 add_definitions(-DVERSION="2.7" -DPREFIX="/System/Library/Frameworks/Python.framework/Versions/2.7" -DSUFFIX="${BITS}")

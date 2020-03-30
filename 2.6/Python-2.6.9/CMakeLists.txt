@@ -7,8 +7,8 @@ if(COMMAND cmake_policy)
 	cmake_policy(SET CMP0005 NEW)
 endif(COMMAND cmake_policy)
 
-add_definitions(-DTARGET_OS_MAC=1)
-add_definitions(-D__APPLE__ -D__MACH__ -D__DYNAMIC__ -DMACOSX)
+
+add_definitions(-DMACOSX)
 add_definitions(-DNDEBUG -DHAVE_NDBM_H -DHAVE_SEM_OPEN -DOBJC2RUNTIME)
 
 add_definitions(-DVERSION="2.6" -DPREFIX="/System/Library/Frameworks/Python.framework/Versions/2.6" -DSUFFIX="${BITS}")
