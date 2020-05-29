@@ -11,7 +11,7 @@ from _ctypes import Union, Structure, Array
 from _ctypes import _Pointer
 from _ctypes import CFuncPtr as _CFuncPtr
 from _ctypes import __version__ as _ctypes_version
-from _ctypes import RTLD_LOCAL, RTLD_GLOBAL
+from _ctypes import RTLD_LAZY, RTLD_NOW, RTLD_LOCAL, RTLD_GLOBAL
 from _ctypes import ArgumentError
 
 from struct import calcsize as _calcsize
@@ -22,7 +22,7 @@ if __version__ != _ctypes_version:
 if _os.name in ("nt", "ce"):
     from _ctypes import FormatError
 
-DEFAULT_MODE = RTLD_LOCAL
+DEFAULT_MODE = RTLD_LOCAL|RTLD_NOW
 if _os.name == "posix" and _sys.platform == "darwin":
     # On OS X 10.3, we use RTLD_GLOBAL as default mode
     # because RTLD_LOCAL does not work at least on some
@@ -30,7 +30,7 @@ if _os.name == "posix" and _sys.platform == "darwin":
     # that.
 
     if int(_os.uname()[2].split('.')[0]) < 8:
-        DEFAULT_MODE = RTLD_GLOBAL
+        DEFAULT_MODE = RTLD_GLOBAL|RTLD_NOW
 
 from _ctypes import FUNCFLAG_CDECL as _FUNCFLAG_CDECL, \
      FUNCFLAG_PYTHONAPI as _FUNCFLAG_PYTHONAPI, \

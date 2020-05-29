@@ -1418,14 +1418,13 @@ static PyObject *py_dl_open(PyObject *self, PyObject *args)
     char *name;
     void * handle;
 #ifdef RTLD_LOCAL
-    int mode = RTLD_NOW | RTLD_LOCAL;
+    int mode = RTLD_LOCAL;
 #else
     /* cygwin doesn't define RTLD_LOCAL */
-    int mode = RTLD_NOW;
+    int mode = 0;
 #endif
     if (!PyArg_ParseTuple(args, "z|i:dlopen", &name, &mode))
         return NULL;
-    mode |= RTLD_NOW;
     handle = ctypes_dlopen(name, mode);
     if (!handle) {
         char *errmsg = ctypes_dlerror();

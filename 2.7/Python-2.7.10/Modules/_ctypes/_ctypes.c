@@ -5723,6 +5723,8 @@ init_ctypes(void)
 #define RTLD_GLOBAL RTLD_LOCAL
 #endif
 
+    PyModule_AddObject(m, "RTLD_LAZY", PyInt_FromLong(RTLD_LAZY));
+    PyModule_AddObject(m, "RTLD_NOW", PyInt_FromLong(RTLD_NOW));
     PyModule_AddObject(m, "RTLD_LOCAL", PyInt_FromLong(RTLD_LOCAL));
     PyModule_AddObject(m, "RTLD_GLOBAL", PyInt_FromLong(RTLD_GLOBAL));
 
