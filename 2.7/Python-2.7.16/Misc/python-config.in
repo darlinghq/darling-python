@@ -37,8 +37,8 @@ for opt in opt_flags:
         print sysconfig.EXEC_PREFIX
 
     elif opt in ('--includes', '--cflags'):
-        flags = ['-I' + sysconfig.get_python_inc(),
-                 '-I' + sysconfig.get_python_inc(plat_specific=True)]
+        flags = ['-iwithsysroot ' + sysconfig.get_python_inc(),
+                 '-iwithsysroot ' + sysconfig.get_python_inc(plat_specific=True)]
         if opt == '--cflags':
             flags.extend(getvar('CFLAGS').split())
         print ' '.join(flags)

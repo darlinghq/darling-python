@@ -216,7 +216,6 @@ def _remove_universal_flags(_config_vars):
 
     return _config_vars
 
-
 def _remove_unsupported_archs(_config_vars):
     """Remove any unsupported archs from config vars"""
     # Different Xcode releases support different sets for '-arch'
@@ -390,15 +389,12 @@ def customize_config_vars(_config_vars):
     Currently called from distutils.sysconfig
     """
 
-    if not _supports_universal_builds():
-        # On Mac OS X before 10.4, check if -arch and -isysroot
-        # are in CFLAGS or LDFLAGS and remove them if they are.
-        # This is needed when building extensions on a 10.3 system
-        # using a universal build of python.
+    if 'ARCHFLAGS' not in os.environ:
+        # Check if -arch is in CFLAGS or LDFLAGS and remove them if they are
         _remove_universal_flags(_config_vars)
-
-    # Allow user to override all archs with ARCHFLAGS env var
-    _override_all_archs(_config_vars)
+    else:
+        # Allow user to override all archs with ARCHFLAGS env var
+        _override_all_archs(_config_vars)
 
     # Remove references to sdks that are not found
     _check_for_unavailable_sdk(_config_vars)

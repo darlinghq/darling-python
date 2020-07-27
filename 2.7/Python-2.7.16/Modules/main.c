@@ -28,6 +28,12 @@
 #endif
 #endif
 
+#ifndef OPEN_SOURCE
+#ifdef __APPLE__
+#include <rootless.h>
+#endif
+#endif
+
 #include "pygetopt.h"
 
 #define COPYRIGHT \
@@ -267,6 +273,15 @@ Py_Main(int argc, char **argv)
     Py_RISCOSWimpFlag = 0;
 #endif
 
+#ifndef OPEN_SOURCE
+#ifdef __APPLE__
+    if (rootless_restricted_environment()) {
+        Py_IgnoreEnvironmentFlag++;
+        Py_NoSiteFlag++;
+        Py_NoUserSiteDirectory++;
+    }
+#endif
+#endif
     /* Hash randomization needed early for all string operations
        (including -W and -X options). */
     _PyOS_opterr = 0;  /* prevent printing the error in 1st pass */
@@ -552,6 +567,13 @@ Py_Main(int argc, char **argv)
 
     if (Py_VerboseFlag ||
         (command == NULL && filename == NULL && module == NULL && stdin_is_interactive)) {
+        fprintf(stderr,
+                "\nWARNING: Python 2.7 is not recommended. "
+                "\nThis version is included in macOS "
+                "for compatibility with legacy software. "
+                "\nFuture versions of macOS will not include Python 2.7. "
+                "\nInstead, it is recommended that you transition to using "
+                "'python3' from within Terminal.\n\n");
         fprintf(stderr, "Python %s on %s\n",
             Py_GetVersion(), Py_GetPlatform());
         if (!Py_NoSiteFlag)

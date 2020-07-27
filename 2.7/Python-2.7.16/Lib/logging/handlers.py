@@ -737,7 +737,8 @@ class SysLogHandler(logging.Handler):
         "CRITICAL" : "critical"
     }
 
-    def __init__(self, address=('localhost', SYSLOG_UDP_PORT),
+    # On Darwin, use /var/run/syslog by default
+    def __init__(self, address='/var/run/syslog',
                  facility=LOG_USER, socktype=None):
         """
         Initialize a handler.

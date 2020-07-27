@@ -19,6 +19,38 @@
 
 #include <ctype.h>
 
+#ifdef ENABLE_DTRACE
+
+#include "pydtrace.h"
+
+#define PYTHON_DTRACE_ENTRY(py_frame)					\
+	if (PYTHON_FUNCTION_ENTRY_ENABLED()) {				\
+		char *fl_name = ((PyStringObject *)py_frame->f_code->	\
+				 co_filename)->ob_sval;			\
+		char *fn_name = ((PyStringObject *)py_frame->f_code->	\
+				 co_name)->ob_sval;			\
+									\
+		PYTHON_FUNCTION_ENTRY(fl_name, fn_name, py_frame->f_lineno,	\
+			      py_frame->f_code->co_argcount);		\
+	}
+
+#define PYTHON_DTRACE_RETURN(py_frame, object)				\
+	if (PYTHON_FUNCTION_RETURN_ENABLED()) {				\
+		char *fl_name = ((PyStringObject *)py_frame->f_code->	\
+				 co_filename)->ob_sval;			\
+		char *fn_name = ((PyStringObject *)py_frame->f_code->	\
+				 co_name)->ob_sval;			\
+									\
+		PYTHON_FUNCTION_RETURN(fl_name, fn_name, object);	\
+	}
+
+#else
+
+#define PYTHON_DTRACE_ENTRY(py_frame) /* nothing */
+#define PYTHON_DTRACE_RETURN(py_frame, object) /* nothing */
+
+#endif /* ENABLE_DTRACE */
+
 #ifndef WITH_TSC
 
 #define READ_TIMESTAMP(var)
@@ -3007,6 +3039,9 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
             PyObject **sp;
             PCALL(PCALL_ALL);
             sp = stack_pointer;
+
+			PYTHON_DTRACE_ENTRY(f);
+
 #ifdef WITH_TSC
             x = call_function(&sp, oparg, &intr0, &intr1);
 #else
@@ -3014,7 +3049,13 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
 #endif
             stack_pointer = sp;
             PUSH(x);
-            if (x != NULL) DISPATCH();
+            if (x != NULL) {
+		    PYTHON_DTRACE_RETURN(f, (char *)x->ob_type->tp_name);
+		    DISPATCH();
+	    }
+
+	    PYTHON_DTRACE_RETURN(f, "error");
+
             break;
         }
 

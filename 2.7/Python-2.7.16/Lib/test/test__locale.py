@@ -6,11 +6,12 @@ except ImportError:
     nl_langinfo = None
 
 import unittest
+import re
 import sys
 from platform import uname
 
 if uname()[0] == "Darwin":
-    maj, min, mic = [int(part) for part in uname()[2].split(".")]
+    maj, min, mic = [int(part) for part in re.split('[.A-Za-z]', uname()[2])[:3]]
     if (maj, min, mic) < (8, 0, 0):
         raise unittest.SkipTest("locale support broken for OS X < 10.4")
 

@@ -493,7 +493,7 @@ class BuildExtTestCase(support.TempdirManager,
         # at least one value we test with will not exist yet.
         if target[1] < 10:
             # for 10.1 through 10.9.x -> "10n0"
-            target = '%02d%01d0' % target
+            target = ('%02d%02d00' if target[1] >= 10 else '%02d%01d0') % target
         else:
             # for 10.10 and beyond -> "10nn00"
             target = '%02d%02d00' % target

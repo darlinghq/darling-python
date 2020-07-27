@@ -6,6 +6,7 @@
 
 /* Standard definitions */
 #include "Python.h"
+#include <stdlib.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <errno.h>
@@ -556,7 +557,12 @@ get_history_item(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "i:get_history_item", &idx))
         return NULL;
-#ifdef  __APPLE__
+/*
+ * Recent versions of libedit have corrected the off-by-one history indexes
+ * (though the Apple version emulates a true offset rather than using the
+ * event id).  So we comment out the off-by-one fix.
+ */
+#if 0 /* __APPLE__ */
     if (using_libedit_emulation) {
         /* Older versions of libedit's readline emulation
          * use 0-based indexes, while readline and newer
@@ -900,6 +906,12 @@ flex_complete(const char *text, int start, int end)
 
 /* Helper to initialize GNU readline properly. */
 
+static char *
+_dummy(const char *x, int y)
+{
+    return NULL;
+}
+
 static void
 setup_readline(void)
 {
@@ -928,6 +940,7 @@ setup_readline(void)
     clear_history();
 #endif /* __APPLE__ */
 
+	rl_completion_entry_function = (Function *)_dummy;
     using_history();
 
     rl_readline_name = "python";
@@ -988,6 +1001,8 @@ setup_readline(void)
     else
 #endif /* __APPLE__ */
         rl_initialize();
+	/* remove tab completion binding */
+	rl_parse_and_bind("bind ^I ed-insert");
 
     RESTORE_LOCALE(saved_locale)
 }
@@ -1162,7 +1177,12 @@ call_readline(FILE *sys_stdin, FILE *sys_stdout, char *prompt)
         int length = _py_get_history_length();
         if (length > 0) {
             HIST_ENTRY *hist_ent;
-#ifdef __APPLE__
+/*
+ * Recent versions of libedit have corrected the off-by-one history indexes
+ * (though the Apple version emulates a true offset rather than using the
+ * event id).  So we comment out the off-by-one fix.
+ */
+#if 0 /* __APPLE__ */
             if (using_libedit_emulation) {
                 /* handle older 0-based or newer 1-based indexing */
                 hist_ent = history_get(length + libedit_history_start - 1);

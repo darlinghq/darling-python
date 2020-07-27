@@ -12,7 +12,7 @@ import sys, os, string
 from types import *
 from distutils.core import Command
 from distutils.debug import DEBUG
-from distutils.sysconfig import get_config_vars
+from distutils.sysconfig import get_config_vars, get_config_var
 from distutils.errors import DistutilsPlatformError
 from distutils.file_util import write_file
 from distutils.util import convert_path, subst_vars, change_root
@@ -330,6 +330,16 @@ class install (Command):
         self.expand_dirs()
 
         self.dump_dirs("post-expand_dirs()")
+
+        if sys.platform == "darwin" and sys.prefix.startswith('/System/Library/Frameworks/'):
+            sitepkg = os.path.join(sys.prefix, 'lib', 'python' + sys.version[:3], 'site-packages')
+            libpy = os.path.join('/Library/Python', sys.version[:3], 'site-packages')
+            if self.install_platlib == sitepkg:
+                self.install_platlib = libpy
+            if self.install_purelib == sitepkg:
+                self.install_purelib = libpy
+            if self.install_scripts == os.path.join(sys.prefix, 'bin'):
+                self.install_scripts = get_config_var('BINDIR')
 
         # Create directories in the home dir:
         if self.user:

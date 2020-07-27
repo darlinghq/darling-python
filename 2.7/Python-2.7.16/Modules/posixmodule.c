@@ -6102,7 +6102,7 @@ static PyObject *
 posix_setgroups(PyObject *self, PyObject *groups)
 {
     Py_ssize_t i, len;
-    gid_t grouplist[MAX_GROUPS];
+    gid_t *grouplist;
 
     if (!PySequence_Check(groups)) {
         PyErr_SetString(PyExc_TypeError, "setgroups argument must be a sequence");
@@ -6112,9 +6112,9 @@ posix_setgroups(PyObject *self, PyObject *groups)
     if (len < 0) {
         return NULL;
     }
-    if (len > MAX_GROUPS) {
-        PyErr_SetString(PyExc_ValueError, "too many groups");
-        return NULL;
+    if ((grouplist = (gid_t *)alloca(len * sizeof(gid_t))) == NULL) {
+	    PyErr_NoMemory();
+	    return NULL;
     }
     for(i = 0; i < len; i++) {
         PyObject *elem;
@@ -7988,6 +7988,15 @@ static struct constdef posix_constants_confstr[] = {
 #endif
 #ifdef _MIPS_CS_VENDOR
     {"MIPS_CS_VENDOR",  _MIPS_CS_VENDOR},
+#endif
+#ifdef _CS_DARWIN_USER_DIR
+    {"CS_DARWIN_USER_DIR", _CS_DARWIN_USER_DIR},
+#endif
+#ifdef _CS_DARWIN_USER_TEMP_DIR
+    {"CS_DARWIN_USER_TEMP_DIR", _CS_DARWIN_USER_TEMP_DIR},
+#endif
+#ifdef _CS_DARWIN_USER_CACHE_DIR
+    {"CS_DARWIN_USER_CACHE_DIR", _CS_DARWIN_USER_CACHE_DIR},
 #endif
 };
 

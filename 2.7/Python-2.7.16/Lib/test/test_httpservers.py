@@ -19,7 +19,7 @@ import CGIHTTPServer
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
-from CGIHTTPServer import CGIHTTPRequestHandler
+from CGIHTTPServer import CGIHTTPRequestHandler, nobody_uid
 from StringIO import StringIO
 from test import test_support
 
@@ -327,6 +327,10 @@ class SimpleHTTPServerTestCase(BaseTestCase):
         os.chdir(basetempdir)
         self.data = 'We are the knights who say Ni!'
         self.tempdir = tempfile.mkdtemp(dir=basetempdir)
+        try:
+            os.chown(self.tempdir, nobody_uid(), -1)
+        except:
+            pass
         self.tempdir_name = os.path.basename(self.tempdir)
         self.base_url = '/' + self.tempdir_name
         temp = open(os.path.join(self.tempdir, 'test'), 'wb')
@@ -378,10 +382,10 @@ class SimpleHTTPServerTestCase(BaseTestCase):
             # chmod() doesn't work as expected on Windows, and filesystem
             # permissions are ignored by root on Unix.
             if os.name == 'posix' and os.geteuid() != 0:
-                os.chmod(self.tempdir, 0)
+                os.rename(self.tempdir, self.tempdir + '0')
                 response = self.request(self.base_url + '/')
                 self.check_status_and_reason(response, 404)
-                os.chmod(self.tempdir, 0755)
+                os.rename(self.tempdir + '0', self.tempdir)
 
     def test_head(self):
         response = self.request(
@@ -458,6 +462,10 @@ class CGIHTTPServerTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
         self.parent_dir = tempfile.mkdtemp()
+        try:
+            os.chown(self.parent_dir, nobody_uid(), -1)
+        except:
+            pass
         self.cgi_dir = os.path.join(self.parent_dir, 'cgi-bin')
         self.cgi_child_dir = os.path.join(self.cgi_dir, 'child-dir')
         os.mkdir(self.cgi_dir)

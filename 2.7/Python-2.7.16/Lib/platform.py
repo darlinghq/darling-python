@@ -1120,13 +1120,13 @@ def architecture(executable=sys.executable,bits='',linkage=''):
         return bits,linkage
 
     # Bits
-    if '32-bit' in fileout:
-        bits = '32bit'
-    elif 'N32' in fileout:
-        # On Irix only
-        bits = 'n32bit'
-    elif '64-bit' in fileout:
-        bits = '64bit'
+#    if '32-bit' in fileout:
+#        bits = '32bit'
+#    elif 'N32' in fileout:
+#        # On Irix only
+#        bits = 'n32bit'
+#    elif '64-bit' in fileout:
+#        bits = '64bit'
 
     # Linkage
     if 'ELF' in fileout:

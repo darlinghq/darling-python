@@ -235,7 +235,7 @@ static PyObject *CFTypeRefObj_CFEqual(CFTypeRefObject *_self, PyObject *_args)
         return NULL;
     _rv = CFEqual(_self->ob_itself,
                   cf2);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("B",
                          _rv);
     return _res;
 }
@@ -378,6 +378,12 @@ static PyMethodDef CFTypeRefObj_methods[] = {
 
 #define CFTypeRefObj_getsetlist NULL
 
+#ifdef __LP64__
+#define PRN_PTRFMT	"%016lx"
+#else // !__LP64__
+#define PRN_PTRFMT	"%08lx"
+#endif // !__LP64__
+#define PRN_PTRTYPE	long
 
 static int CFTypeRefObj_compare(CFTypeRefObject *self, CFTypeRefObject *other)
 {
@@ -390,14 +396,14 @@ static int CFTypeRefObj_compare(CFTypeRefObject *self, CFTypeRefObject *other)
 static PyObject * CFTypeRefObj_repr(CFTypeRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFTypeRef type-%d object at 0x%8.8x for 0x%8.8x>", (int)CFGetTypeID(self->ob_itself), (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFTypeRef type-%d object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (int)CFGetTypeID(self->ob_itself), (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFTypeRefObj_hash(CFTypeRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFTypeRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -594,14 +600,14 @@ static int CFArrayRefObj_compare(CFArrayRefObject *self, CFArrayRefObject *other
 static PyObject * CFArrayRefObj_repr(CFArrayRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFArrayRef object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFArrayRef object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFArrayRefObj_hash(CFArrayRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFArrayRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -834,14 +840,14 @@ static int CFMutableArrayRefObj_compare(CFMutableArrayRefObject *self, CFMutable
 static PyObject * CFMutableArrayRefObj_repr(CFMutableArrayRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFMutableArrayRef object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFMutableArrayRef object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFMutableArrayRefObj_hash(CFMutableArrayRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFMutableArrayRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -1027,14 +1033,14 @@ static int CFDictionaryRefObj_compare(CFDictionaryRefObject *self, CFDictionaryR
 static PyObject * CFDictionaryRefObj_repr(CFDictionaryRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFDictionaryRef object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFDictionaryRef object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFDictionaryRefObj_hash(CFDictionaryRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFDictionaryRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -1204,14 +1210,14 @@ static int CFMutableDictionaryRefObj_compare(CFMutableDictionaryRefObject *self,
 static PyObject * CFMutableDictionaryRefObj_repr(CFMutableDictionaryRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFMutableDictionaryRef object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFMutableDictionaryRef object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFMutableDictionaryRefObj_hash(CFMutableDictionaryRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFMutableDictionaryRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -1386,7 +1392,7 @@ static PyObject *CFDataRefObj_CFStringCreateFromExternalRepresentation(CFDataRef
     PyObject *_res = NULL;
     CFStringRef _rv;
     CFStringEncoding encoding;
-    if (!PyArg_ParseTuple(_args, "l",
+    if (!PyArg_ParseTuple(_args, "I",
                           &encoding))
         return NULL;
     _rv = CFStringCreateFromExternalRepresentation((CFAllocatorRef)NULL,
@@ -1401,7 +1407,7 @@ static PyObject *CFDataRefObj_CFDataGetData(CFDataRefObject *_self, PyObject *_a
 {
     PyObject *_res = NULL;
 
-    int size = CFDataGetLength(_self->ob_itself);
+    int size = (int)CFDataGetLength(_self->ob_itself);
     char *data = (char *)CFDataGetBytePtr(_self->ob_itself);
 
     _res = (PyObject *)PyString_FromStringAndSize(data, size);
@@ -1435,14 +1441,14 @@ static int CFDataRefObj_compare(CFDataRefObject *self, CFDataRefObject *other)
 static PyObject * CFDataRefObj_repr(CFDataRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFDataRef object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFDataRef object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFDataRefObj_hash(CFDataRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFDataRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -1700,14 +1706,14 @@ static int CFMutableDataRefObj_compare(CFMutableDataRefObject *self, CFMutableDa
 static PyObject * CFMutableDataRefObj_repr(CFMutableDataRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFMutableDataRef object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFMutableDataRef object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFMutableDataRefObj_hash(CFMutableDataRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFMutableDataRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -1917,7 +1923,7 @@ static PyObject *CFStringRefObj_CFStringGetBytes(CFStringRefObject *_self, PyObj
 #ifndef CFStringGetBytes
     PyMac_PRECHECK(CFStringGetBytes);
 #endif
-    if (!PyArg_ParseTuple(_args, "O&lbll",
+    if (!PyArg_ParseTuple(_args, "O&IBBl",
                           CFRange_Convert, &range,
                           &encoding,
                           &lossByte,
@@ -1932,7 +1938,7 @@ static PyObject *CFStringRefObj_CFStringGetBytes(CFStringRefObject *_self, PyObj
                            &buffer,
                            maxBufLen,
                            &usedBufLen);
-    _res = Py_BuildValue("lbl",
+    _res = Py_BuildValue("lBl",
                          _rv,
                          buffer,
                          usedBufLen);
@@ -1945,7 +1951,7 @@ static PyObject *CFStringRefObj_CFStringCreateExternalRepresentation(CFStringRef
     CFDataRef _rv;
     CFStringEncoding encoding;
     UInt8 lossByte;
-    if (!PyArg_ParseTuple(_args, "lb",
+    if (!PyArg_ParseTuple(_args, "IB",
                           &encoding,
                           &lossByte))
         return NULL;
@@ -1968,7 +1974,7 @@ static PyObject *CFStringRefObj_CFStringGetSmallestEncoding(CFStringRefObject *_
     if (!PyArg_ParseTuple(_args, ""))
         return NULL;
     _rv = CFStringGetSmallestEncoding(_self->ob_itself);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("I",
                          _rv);
     return _res;
 }
@@ -1983,7 +1989,7 @@ static PyObject *CFStringRefObj_CFStringGetFastestEncoding(CFStringRefObject *_s
     if (!PyArg_ParseTuple(_args, ""))
         return NULL;
     _rv = CFStringGetFastestEncoding(_self->ob_itself);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("I",
                          _rv);
     return _res;
 }
@@ -2054,7 +2060,7 @@ static PyObject *CFStringRefObj_CFStringFindWithOptions(CFStringRefObject *_self
                                   rangeToSearch,
                                   searchOptions,
                                   &result);
-    _res = Py_BuildValue("lO&",
+    _res = Py_BuildValue("BO&",
                          _rv,
                          CFRange_New, result);
     return _res;
@@ -2116,7 +2122,7 @@ static PyObject *CFStringRefObj_CFStringHasPrefix(CFStringRefObject *_self, PyOb
         return NULL;
     _rv = CFStringHasPrefix(_self->ob_itself,
                             prefix);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("B",
                          _rv);
     return _res;
 }
@@ -2134,7 +2140,7 @@ static PyObject *CFStringRefObj_CFStringHasSuffix(CFStringRefObject *_self, PyOb
         return NULL;
     _rv = CFStringHasSuffix(_self->ob_itself,
                             suffix);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("B",
                          _rv);
     return _res;
 }
@@ -2220,7 +2226,7 @@ static PyObject *CFStringRefObj_CFStringConvertIANACharSetNameToEncoding(CFStrin
     if (!PyArg_ParseTuple(_args, ""))
         return NULL;
     _rv = CFStringConvertIANACharSetNameToEncoding(_self->ob_itself);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("I",
                          _rv);
     return _res;
 }
@@ -2261,7 +2267,7 @@ static PyObject *CFStringRefObj_CFURLCreateWithFileSystemPath(CFStringRefObject 
     CFURLRef _rv;
     CFURLPathStyle pathStyle;
     Boolean isDirectory;
-    if (!PyArg_ParseTuple(_args, "ll",
+    if (!PyArg_ParseTuple(_args, "lB",
                           &pathStyle,
                           &isDirectory))
         return NULL;
@@ -2281,7 +2287,7 @@ static PyObject *CFStringRefObj_CFURLCreateWithFileSystemPathRelativeToBase(CFSt
     CFURLPathStyle pathStyle;
     Boolean isDirectory;
     CFURLRef baseURL;
-    if (!PyArg_ParseTuple(_args, "llO&",
+    if (!PyArg_ParseTuple(_args, "lBO&",
                           &pathStyle,
                           &isDirectory,
                           OptionalCFURLRefObj_Convert, &baseURL))
@@ -2319,7 +2325,7 @@ static PyObject *CFStringRefObj_CFURLCreateStringByAddingPercentEscapes(CFString
     CFStringRef charactersToLeaveUnescaped;
     CFStringRef legalURLCharactersToBeEscaped;
     CFStringEncoding encoding;
-    if (!PyArg_ParseTuple(_args, "O&O&l",
+    if (!PyArg_ParseTuple(_args, "O&O&I",
                           CFStringRefObj_Convert, &charactersToLeaveUnescaped,
                           CFStringRefObj_Convert, &legalURLCharactersToBeEscaped,
                           &encoding))
@@ -2338,7 +2344,7 @@ static PyObject *CFStringRefObj_CFStringGetString(CFStringRefObject *_self, PyOb
 {
     PyObject *_res = NULL;
 
-    int size = CFStringGetLength(_self->ob_itself)+1;
+    int size = (int)CFStringGetLength(_self->ob_itself)+1;
     char *data = malloc(size);
 
     if( data == NULL ) return PyErr_NoMemory();
@@ -2357,7 +2363,7 @@ static PyObject *CFStringRefObj_CFStringGetUnicode(CFStringRefObject *_self, PyO
 {
     PyObject *_res = NULL;
 
-    int size = CFStringGetLength(_self->ob_itself)+1;
+    int size = (int)CFStringGetLength(_self->ob_itself)+1;
     Py_UNICODE *data = malloc(size*sizeof(Py_UNICODE));
     CFRange range;
 
@@ -2443,14 +2449,14 @@ static int CFStringRefObj_compare(CFStringRefObject *self, CFStringRefObject *ot
 static PyObject * CFStringRefObj_repr(CFStringRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFStringRef object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFStringRef object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFStringRefObj_hash(CFStringRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFStringRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -2631,7 +2637,7 @@ static PyObject *CFMutableStringRefObj_CFStringAppendPascalString(CFMutableStrin
 #ifndef CFStringAppendPascalString
     PyMac_PRECHECK(CFStringAppendPascalString);
 #endif
-    if (!PyArg_ParseTuple(_args, "O&l",
+    if (!PyArg_ParseTuple(_args, "O&I",
                           PyMac_GetStr255, pStr,
                           &encoding))
         return NULL;
@@ -2651,7 +2657,7 @@ static PyObject *CFMutableStringRefObj_CFStringAppendCString(CFMutableStringRefO
 #ifndef CFStringAppendCString
     PyMac_PRECHECK(CFStringAppendCString);
 #endif
-    if (!PyArg_ParseTuple(_args, "sl",
+    if (!PyArg_ParseTuple(_args, "sI",
                           &cStr,
                           &encoding))
         return NULL;
@@ -2831,14 +2837,14 @@ static int CFMutableStringRefObj_compare(CFMutableStringRefObject *self, CFMutab
 static PyObject * CFMutableStringRefObj_repr(CFMutableStringRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFMutableStringRef object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFMutableStringRef object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFMutableStringRefObj_hash(CFMutableStringRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFMutableStringRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -2980,7 +2986,7 @@ static PyObject *CFURLRefObj_CFURLCreateData(CFURLRefObject *_self, PyObject *_a
     CFDataRef _rv;
     CFStringEncoding encoding;
     Boolean escapeWhitespace;
-    if (!PyArg_ParseTuple(_args, "ll",
+    if (!PyArg_ParseTuple(_args, "IB",
                           &encoding,
                           &escapeWhitespace))
         return NULL;
@@ -3003,7 +3009,7 @@ static PyObject *CFURLRefObj_CFURLGetFileSystemRepresentation(CFURLRefObject *_s
 #ifndef CFURLGetFileSystemRepresentation
     PyMac_PRECHECK(CFURLGetFileSystemRepresentation);
 #endif
-    if (!PyArg_ParseTuple(_args, "ll",
+    if (!PyArg_ParseTuple(_args, "Bl",
                           &resolveAgainstBase,
                           &maxBufLen))
         return NULL;
@@ -3011,7 +3017,7 @@ static PyObject *CFURLRefObj_CFURLGetFileSystemRepresentation(CFURLRefObject *_s
                                            resolveAgainstBase,
                                            &buffer,
                                            maxBufLen);
-    _res = Py_BuildValue("lb",
+    _res = Py_BuildValue("BB",
                          _rv,
                          buffer);
     return _res;
@@ -3072,7 +3078,7 @@ static PyObject *CFURLRefObj_CFURLCanBeDecomposed(CFURLRefObject *_self, PyObjec
     if (!PyArg_ParseTuple(_args, ""))
         return NULL;
     _rv = CFURLCanBeDecomposed(_self->ob_itself);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("B",
                          _rv);
     return _res;
 }
@@ -3134,7 +3140,7 @@ static PyObject *CFURLRefObj_CFURLCopyStrictPath(CFURLRefObject *_self, PyObject
         return NULL;
     _rv = CFURLCopyStrictPath(_self->ob_itself,
                               &isAbsolute);
-    _res = Py_BuildValue("O&l",
+    _res = Py_BuildValue("O&B",
                          CFStringRefObj_New, _rv,
                          isAbsolute);
     return _res;
@@ -3168,7 +3174,7 @@ static PyObject *CFURLRefObj_CFURLHasDirectoryPath(CFURLRefObject *_self, PyObje
     if (!PyArg_ParseTuple(_args, ""))
         return NULL;
     _rv = CFURLHasDirectoryPath(_self->ob_itself);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("B",
                          _rv);
     return _res;
 }
@@ -3338,7 +3344,7 @@ static PyObject *CFURLRefObj_CFURLCreateCopyAppendingPathComponent(CFURLRefObjec
     CFURLRef _rv;
     CFStringRef pathComponent;
     Boolean isDirectory;
-    if (!PyArg_ParseTuple(_args, "O&l",
+    if (!PyArg_ParseTuple(_args, "O&B",
                           CFStringRefObj_Convert, &pathComponent,
                           &isDirectory))
         return NULL;
@@ -3405,7 +3411,7 @@ static PyObject *CFURLRefObj_CFURLGetFSRef(CFURLRefObject *_self, PyObject *_arg
         return NULL;
     _rv = CFURLGetFSRef(_self->ob_itself,
                         &fsRef);
-    _res = Py_BuildValue("lO&",
+    _res = Py_BuildValue("BO&",
                          _rv,
                          PyMac_BuildFSRef, &fsRef);
     return _res;
@@ -3483,14 +3489,14 @@ static int CFURLRefObj_compare(CFURLRefObject *self, CFURLRefObject *other)
 static PyObject * CFURLRefObj_repr(CFURLRefObject *self)
 {
     char buf[100];
-    sprintf(buf, "<CFURL object at 0x%8.8x for 0x%8.8x>", (unsigned)self, (unsigned)self->ob_itself);
+    sprintf(buf, "<CFURL object at 0x" PRN_PTRFMT " for 0x" PRN_PTRFMT ">", (PRN_PTRTYPE)self, (PRN_PTRTYPE)self->ob_itself);
     return PyString_FromString(buf);
 }
 
 static int CFURLRefObj_hash(CFURLRefObject *self)
 {
     /* XXXX Or should we use CFHash?? */
-    return (int)self->ob_itself;
+    return (int)(long)self->ob_itself;
 }
 static int CFURLRefObj_tp_init(PyObject *_self, PyObject *_args, PyObject *_kwds)
 {
@@ -3891,7 +3897,7 @@ static PyObject *CF_CFPreferencesGetAppBooleanValue(PyObject *_self, PyObject *_
     _rv = CFPreferencesGetAppBooleanValue(key,
                                           applicationID,
                                           &keyExistsAndHasValidFormat);
-    _res = Py_BuildValue("ll",
+    _res = Py_BuildValue("BB",
                          _rv,
                          keyExistsAndHasValidFormat);
     return _res;
@@ -3914,7 +3920,7 @@ static PyObject *CF_CFPreferencesGetAppIntegerValue(PyObject *_self, PyObject *_
     _rv = CFPreferencesGetAppIntegerValue(key,
                                           applicationID,
                                           &keyExistsAndHasValidFormat);
-    _res = Py_BuildValue("ll",
+    _res = Py_BuildValue("lB",
                          _rv,
                          keyExistsAndHasValidFormat);
     return _res;
@@ -3992,7 +3998,7 @@ static PyObject *CF_CFPreferencesAppSynchronize(PyObject *_self, PyObject *_args
                           CFStringRefObj_Convert, &applicationID))
         return NULL;
     _rv = CFPreferencesAppSynchronize(applicationID);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("B",
                          _rv);
     return _res;
 }
@@ -4123,7 +4129,7 @@ static PyObject *CF_CFPreferencesSynchronize(PyObject *_self, PyObject *_args)
     _rv = CFPreferencesSynchronize(applicationID,
                                    userName,
                                    hostName);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("B",
                          _rv);
     return _res;
 }
@@ -4195,7 +4201,7 @@ static PyObject *CF_CFStringCreateWithPascalString(PyObject *_self, PyObject *_a
 #ifndef CFStringCreateWithPascalString
     PyMac_PRECHECK(CFStringCreateWithPascalString);
 #endif
-    if (!PyArg_ParseTuple(_args, "O&l",
+    if (!PyArg_ParseTuple(_args, "O&I",
                           PyMac_GetStr255, pStr,
                           &encoding))
         return NULL;
@@ -4216,7 +4222,7 @@ static PyObject *CF_CFStringCreateWithCString(PyObject *_self, PyObject *_args)
 #ifndef CFStringCreateWithCString
     PyMac_PRECHECK(CFStringCreateWithCString);
 #endif
-    if (!PyArg_ParseTuple(_args, "sl",
+    if (!PyArg_ParseTuple(_args, "sI",
                           &cStr,
                           &encoding))
         return NULL;
@@ -4258,7 +4264,7 @@ static PyObject *CF_CFStringCreateWithPascalStringNoCopy(PyObject *_self, PyObje
 #ifndef CFStringCreateWithPascalStringNoCopy
     PyMac_PRECHECK(CFStringCreateWithPascalStringNoCopy);
 #endif
-    if (!PyArg_ParseTuple(_args, "O&l",
+    if (!PyArg_ParseTuple(_args, "O&I",
                           PyMac_GetStr255, pStr,
                           &encoding))
         return NULL;
@@ -4280,7 +4286,7 @@ static PyObject *CF_CFStringCreateWithCStringNoCopy(PyObject *_self, PyObject *_
 #ifndef CFStringCreateWithCStringNoCopy
     PyMac_PRECHECK(CFStringCreateWithCStringNoCopy);
 #endif
-    if (!PyArg_ParseTuple(_args, "sl",
+    if (!PyArg_ParseTuple(_args, "sI",
                           &cStr,
                           &encoding))
         return NULL;
@@ -4366,7 +4372,7 @@ static PyObject *CF_CFStringCreateWithBytes(PyObject *_self, PyObject *_args)
 #ifndef CFStringCreateWithBytes
     PyMac_PRECHECK(CFStringCreateWithBytes);
 #endif
-    if (!PyArg_ParseTuple(_args, "s#ll",
+    if (!PyArg_ParseTuple(_args, "s#IB",
                           &bytes__in__, &bytes__in_len__,
                           &encoding,
                           &isExternalRepresentation))
@@ -4391,7 +4397,7 @@ static PyObject *CF_CFStringGetSystemEncoding(PyObject *_self, PyObject *_args)
     if (!PyArg_ParseTuple(_args, ""))
         return NULL;
     _rv = CFStringGetSystemEncoding();
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("I",
                          _rv);
     return _res;
 }
@@ -4405,7 +4411,7 @@ static PyObject *CF_CFStringGetMaximumSizeForEncoding(PyObject *_self, PyObject 
 #ifndef CFStringGetMaximumSizeForEncoding
     PyMac_PRECHECK(CFStringGetMaximumSizeForEncoding);
 #endif
-    if (!PyArg_ParseTuple(_args, "ll",
+    if (!PyArg_ParseTuple(_args, "lI",
                           &length,
                           &encoding))
         return NULL;
@@ -4424,11 +4430,11 @@ static PyObject *CF_CFStringIsEncodingAvailable(PyObject *_self, PyObject *_args
 #ifndef CFStringIsEncodingAvailable
     PyMac_PRECHECK(CFStringIsEncodingAvailable);
 #endif
-    if (!PyArg_ParseTuple(_args, "l",
+    if (!PyArg_ParseTuple(_args, "I",
                           &encoding))
         return NULL;
     _rv = CFStringIsEncodingAvailable(encoding);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("B",
                          _rv);
     return _res;
 }
@@ -4441,7 +4447,7 @@ static PyObject *CF_CFStringGetNameOfEncoding(PyObject *_self, PyObject *_args)
 #ifndef CFStringGetNameOfEncoding
     PyMac_PRECHECK(CFStringGetNameOfEncoding);
 #endif
-    if (!PyArg_ParseTuple(_args, "l",
+    if (!PyArg_ParseTuple(_args, "I",
                           &encoding))
         return NULL;
     _rv = CFStringGetNameOfEncoding(encoding);
@@ -4458,11 +4464,11 @@ static PyObject *CF_CFStringConvertEncodingToNSStringEncoding(PyObject *_self, P
 #ifndef CFStringConvertEncodingToNSStringEncoding
     PyMac_PRECHECK(CFStringConvertEncodingToNSStringEncoding);
 #endif
-    if (!PyArg_ParseTuple(_args, "l",
+    if (!PyArg_ParseTuple(_args, "I",
                           &encoding))
         return NULL;
-    _rv = CFStringConvertEncodingToNSStringEncoding(encoding);
-    _res = Py_BuildValue("l",
+    _rv = (UInt32)CFStringConvertEncodingToNSStringEncoding(encoding);
+    _res = Py_BuildValue("I",
                          _rv);
     return _res;
 }
@@ -4475,7 +4481,7 @@ static PyObject *CF_CFStringConvertNSStringEncodingToEncoding(PyObject *_self, P
 #ifndef CFStringConvertNSStringEncodingToEncoding
     PyMac_PRECHECK(CFStringConvertNSStringEncodingToEncoding);
 #endif
-    if (!PyArg_ParseTuple(_args, "l",
+    if (!PyArg_ParseTuple(_args, "I",
                           &encoding))
         return NULL;
     _rv = CFStringConvertNSStringEncodingToEncoding(encoding);
@@ -4492,11 +4498,11 @@ static PyObject *CF_CFStringConvertEncodingToWindowsCodepage(PyObject *_self, Py
 #ifndef CFStringConvertEncodingToWindowsCodepage
     PyMac_PRECHECK(CFStringConvertEncodingToWindowsCodepage);
 #endif
-    if (!PyArg_ParseTuple(_args, "l",
+    if (!PyArg_ParseTuple(_args, "I",
                           &encoding))
         return NULL;
     _rv = CFStringConvertEncodingToWindowsCodepage(encoding);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("I",
                          _rv);
     return _res;
 }
@@ -4509,11 +4515,11 @@ static PyObject *CF_CFStringConvertWindowsCodepageToEncoding(PyObject *_self, Py
 #ifndef CFStringConvertWindowsCodepageToEncoding
     PyMac_PRECHECK(CFStringConvertWindowsCodepageToEncoding);
 #endif
-    if (!PyArg_ParseTuple(_args, "l",
+    if (!PyArg_ParseTuple(_args, "I",
                           &codepage))
         return NULL;
     _rv = CFStringConvertWindowsCodepageToEncoding(codepage);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("I",
                          _rv);
     return _res;
 }
@@ -4526,7 +4532,7 @@ static PyObject *CF_CFStringConvertEncodingToIANACharSetName(PyObject *_self, Py
 #ifndef CFStringConvertEncodingToIANACharSetName
     PyMac_PRECHECK(CFStringConvertEncodingToIANACharSetName);
 #endif
-    if (!PyArg_ParseTuple(_args, "l",
+    if (!PyArg_ParseTuple(_args, "I",
                           &encoding))
         return NULL;
     _rv = CFStringConvertEncodingToIANACharSetName(encoding);
@@ -4547,7 +4553,7 @@ static PyObject *CF_CFStringGetMostCompatibleMacStringEncoding(PyObject *_self, 
                           &encoding))
         return NULL;
     _rv = CFStringGetMostCompatibleMacStringEncoding(encoding);
-    _res = Py_BuildValue("l",
+    _res = Py_BuildValue("I",
                          _rv);
     return _res;
 }
@@ -4596,7 +4602,7 @@ static PyObject *CF_CFURLCreateWithBytes(PyObject *_self, PyObject *_args)
 #ifndef CFURLCreateWithBytes
     PyMac_PRECHECK(CFURLCreateWithBytes);
 #endif
-    if (!PyArg_ParseTuple(_args, "s#lO&",
+    if (!PyArg_ParseTuple(_args, "s#IO&",
                           &URLBytes__in__, &URLBytes__in_len__,
                           &encoding,
                           OptionalCFURLRefObj_Convert, &baseURL))
@@ -4622,7 +4628,7 @@ static PyObject *CF_CFURLCreateFromFileSystemRepresentation(PyObject *_self, PyO
 #ifndef CFURLCreateFromFileSystemRepresentation
     PyMac_PRECHECK(CFURLCreateFromFileSystemRepresentation);
 #endif
-    if (!PyArg_ParseTuple(_args, "s#l",
+    if (!PyArg_ParseTuple(_args, "s#B",
                           &buffer__in__, &buffer__in_len__,
                           &isDirectory))
         return NULL;
@@ -4647,7 +4653,7 @@ static PyObject *CF_CFURLCreateFromFileSystemRepresentationRelativeToBase(PyObje
 #ifndef CFURLCreateFromFileSystemRepresentationRelativeToBase
     PyMac_PRECHECK(CFURLCreateFromFileSystemRepresentationRelativeToBase);
 #endif
-    if (!PyArg_ParseTuple(_args, "s#lO&",
+    if (!PyArg_ParseTuple(_args, "s#BO&",
                           &buffer__in__, &buffer__in_len__,
                           &isDirectory,
                           OptionalCFURLRefObj_Convert, &baseURL))

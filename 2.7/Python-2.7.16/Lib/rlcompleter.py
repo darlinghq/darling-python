@@ -101,18 +101,20 @@ class Completer:
 
         """
         import keyword
-        matches = []
+        hash = {}
         seen = {"__builtins__"}
         n = len(text)
         for word in keyword.kwlist:
             if word[:n] == text:
                 seen.add(word)
-                matches.append(word)
+                hash[word] = 1
         for nspace in [self.namespace, __builtin__.__dict__]:
             for word, val in nspace.items():
                 if word[:n] == text and word not in seen:
                     seen.add(word)
-                    matches.append(self._callable_postfix(val, word))
+                    hash[self._callable_postfix(val, word)] = 1
+        matches = hash.keys()
+        matches.sort()
         return matches
 
     def attr_matches(self, text):
@@ -144,7 +146,7 @@ class Completer:
         if hasattr(thisobject, '__class__'):
             words.add('__class__')
             words.update(get_class_members(thisobject.__class__))
-        matches = []
+        hash = {}
         n = len(attr)
         for word in words:
             if word[:n] == attr:
@@ -153,7 +155,9 @@ class Completer:
                 except Exception:
                     continue  # Exclude properties that are not set
                 word = self._callable_postfix(val, "%s.%s" % (expr, word))
-                matches.append(word)
+                hash[word] = 1
+        matches.sort()
+        matches = hash.keys()
         matches.sort()
         return matches
 

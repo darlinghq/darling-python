@@ -26,6 +26,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "Python.h"
 #include "pymactoolbox.h"
 #include <arpa/inet.h>  /* for ntohl, htonl */
+#ifndef __LP64__
+#include <QuickTime/QuickTime.h>
+#endif
 
 
 /* Like strerror() but for Mac OS error numbers */

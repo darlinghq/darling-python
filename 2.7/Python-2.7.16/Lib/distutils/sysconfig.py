@@ -90,6 +90,11 @@ def get_python_inc(plat_specific=0, prefix=None):
                 # Include is located in the srcdir
                 inc_dir = os.path.join(srcdir, "Include")
             return inc_dir
+        sdkroot = os.environ.get('SDKROOT')
+        if sdkroot is not None and ((prefix.startswith('/usr/') and not prefix.startswith('/usr/local')) or prefix.startswith('/System/')):
+            inc = os.path.join(sdkroot, prefix[1:], "include", "python" + get_python_version())
+            if os.path.exists(inc):
+                return inc
         return os.path.join(prefix, "include", "python" + get_python_version())
     elif os.name == "nt":
         return os.path.join(prefix, "include")
@@ -124,7 +129,10 @@ def get_python_lib(plat_specific=0, standard_lib=0, prefix=None):
         if standard_lib:
             return libpython
         else:
-            return os.path.join(libpython, "site-packages")
+            if sys.platform == "darwin" and prefix.startswith('/System/Library/Frameworks/'):
+                return os.path.join("/Library/Python", get_python_version(), "site-packages")
+            else:
+                return os.path.join(libpython, "site-packages")
 
     elif os.name == "nt":
         if standard_lib:
@@ -399,6 +407,17 @@ def _init_posix():
     global _config_vars
     _config_vars = {}
     _config_vars.update(build_time_vars)
+    if sys.platform == 'darwin':
+        sdkroot = os.environ.get('SDKROOT')
+        if sdkroot is not None:
+            if _config_vars['LIBRARY'].endswith('.a'):
+                _config_vars['LIBRARY'] = _config_vars['LIBRARY'][:-2] + '.dylib'
+            for p in ('INCLUDEPY', 'LIBPL'):
+                q = _config_vars[p]
+                if (q.startswith('/usr/') and not q.startswith('/usr/local')) or q.startswith('/System/'):
+                    q = os.path.join(sdkroot, q[1:])
+                    if os.path.exists(q):
+                        _config_vars[p] = q
 
 
 def _init_nt():

@@ -376,6 +376,8 @@ struct basespec {
 extern char basespec_string[];
 
 extern ffi_type *_ctypes_get_ffi_type(PyObject *obj);
+extern void ffi_closure_free(void *p);
+extern void *ffi_closure_alloc(size_t ignored, void** codeloc);
 
 /* exception classes */
 extern PyObject *PyExc_ArgError;

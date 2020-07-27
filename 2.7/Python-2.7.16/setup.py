@@ -47,6 +47,9 @@ def macosx_sdk_root():
     Return the directory of the current OSX SDK,
     or '/' if no SDK was specified.
     """
+    sdkroot = os.environ.get('SDKROOT')
+    if sdkroot is not None:
+        return sdkroot
     cflags = sysconfig.get_config_var('CFLAGS')
     m = re.search(r'-isysroot\s+(\S+)', cflags)
     if m is None:
@@ -59,9 +62,9 @@ def is_macosx_sdk_path(path):
     """
     Returns True if 'path' can be located in an OSX SDK
     """
-    return ( (path.startswith('/usr/') and not path.startswith('/usr/local'))
+    return ( path.startswith('/usr/')
                 or path.startswith('/System/')
-                or path.startswith('/Library/') )
+                or path.startswith('/Library/') and not path.startswith('/Library/Caches/') )
 
 def find_file(filename, std_dirs, paths):
     """Searches for the directory where a given file is located,
@@ -94,7 +97,8 @@ def find_file(filename, std_dirs, paths):
         f = os.path.join(dir, filename)
 
         if host_platform == 'darwin' and is_macosx_sdk_path(dir):
-            f = os.path.join(sysroot, dir[1:], filename)
+            dir = os.path.join(sysroot, dir[1:])
+            f = os.path.join(dir, filename)
 
         if os.path.exists(f):
             return [dir]
@@ -146,8 +150,9 @@ def find_library_file(compiler, libname, std_dirs, paths):
         p = p.rstrip(os.sep)
 
         if host_platform == 'darwin' and is_macosx_sdk_path(p):
-            if os.path.join(sysroot, p[1:]) == dirname:
-                return [ p ]
+            sp = os.path.join(sysroot, p[1:])
+            if sp == dirname:
+                return [ sp ]
 
         if p == dirname:
             return [p]
@@ -319,7 +324,7 @@ class PyBuildExt(build_ext):
             return
 
         if host_platform == 'darwin' and (
-                sys.maxint > 2**32 and '-arch' in ext.extra_link_args):
+                sys.maxint > 2**32 and '-no64' in ext.extra_link_args):
             # Don't bother doing an import check when an extension was
             # build with an explicit '-arch' flag on OSX. That's currently
             # only used to build 32-bit only extensions in a 4-way
@@ -334,6 +339,13 @@ class PyBuildExt(build_ext):
         # modules have been imported
         if host_platform == 'cygwin':
             self.announce('WARNING: skipping import check for Cygwin-based "%s"'
+                % ext.name)
+            return
+        # Workaround for building python against an SDK on OSX, since
+        # modules may not work when imported into a system other than
+        # what they were built against
+        if host_platform == 'darwin':
+            self.announce('WARNING: skipping import check for darwin-based "%s"'
                 % ext.name)
             return
         ext_filename = os.path.join(
@@ -454,10 +466,10 @@ class PyBuildExt(build_ext):
             os.unlink(tmpfile)
 
     def detect_modules(self):
-        # Ensure that /usr/local is always used
-        if not cross_compiling:
-            add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
-            add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
+#        # Ensure that /usr/local is always used
+#        if not cross_compiling:
+#            add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
+#            add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
         if cross_compiling:
             self.add_gcc_paths()
         self.add_multiarch_paths()
@@ -516,7 +528,13 @@ class PyBuildExt(build_ext):
         # if a file is found in one of those directories, it can
         # be assumed that no additional -I,-L directives are needed.
         inc_dirs = self.compiler.include_dirs[:]
+        for d in ('/usr/local/include', '/usr/include',):
+            if d not in inc_dirs:
+                inc_dirs.insert(0, d)
         lib_dirs = self.compiler.library_dirs[:]
+        for d in ('/usr/local/lib',):
+            if d not in lib_dirs:
+                lib_dirs.append(d)
         if not cross_compiling:
             for d in (
                 '/usr/include',
@@ -716,9 +734,9 @@ class PyBuildExt(build_ext):
         exts.append( Extension('audioop', ['audioop.c']) )
 
         # Disabled on 64-bit platforms
-        if sys.maxsize != 9223372036854775807L:
+        if True:
             # Operations on images
-            exts.append( Extension('imageop', ['imageop.c']) )
+            exts.append( Extension('imageop', ['imageop.c'], extra_compile_args = ['-no64'], extra_link_args = ['-no64']) )
         else:
             missing.extend(['imageop'])
 
@@ -752,27 +770,27 @@ class PyBuildExt(build_ext):
         elif self.compiler.find_library_file(lib_dirs, 'curses'):
             curses_library = 'curses'
 
-        if host_platform == 'darwin':
-            os_release = int(os.uname()[2].split('.')[0])
-            dep_target = sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET')
-            if (dep_target and
-                    (tuple(int(n) for n in dep_target.split('.')[0:2])
-                        < (10, 5) ) ):
-                os_release = 8
-            if os_release < 9:
-                # MacOSX 10.4 has a broken readline. Don't try to build
-                # the readline module unless the user has installed a fixed
-                # readline package
-                if find_file('readline/rlconf.h', inc_dirs, []) is None:
-                    do_readline = False
+#        if host_platform == 'darwin':
+#            os_release = int(os.uname()[2].split('.')[0])
+#            dep_target = sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET')
+#            if (dep_target and
+#                    (tuple(int(n) for n in dep_target.split('.')[0:2])
+#                        < (10, 5) ) ):
+#                os_release = 8
+#            if os_release < 9:
+#                # MacOSX 10.4 has a broken readline. Don't try to build
+#                # the readline module unless the user has installed a fixed
+#                # readline package
+#                if find_file('readline/rlconf.h', inc_dirs, []) is None:
+#                    do_readline = False
         if do_readline:
-            if host_platform == 'darwin' and os_release < 9:
+            if True:
                 # In every directory on the search path search for a dynamic
                 # library and then a static library, instead of first looking
                 # for dynamic libraries on the entire path.
                 # This way a statically linked custom readline gets picked up
                 # before the (possibly broken) dynamic library in /usr/lib.
-                readline_extra_link_args = ('-Wl,-search_paths_first',)
+                readline_extra_link_args = ()
             else:
                 readline_extra_link_args = ()
 
@@ -786,7 +804,7 @@ class PyBuildExt(build_ext):
                                                      'termcap'):
                 readline_libs.append('termcap')
             exts.append( Extension('readline', ['readline.c'],
-                                   library_dirs=['/usr/lib/termcap'],
+#                                   library_dirs=['/usr/lib/termcap'],
                                    extra_link_args=readline_extra_link_args,
                                    libraries=readline_libs) )
         else:
@@ -1202,7 +1220,7 @@ class PyBuildExt(build_ext):
                 # for dynamic libraries on the entire path.
                 # This way a statically linked custom sqlite gets picked up
                 # before the dynamic library in /usr/lib.
-                sqlite_extra_link_args = ('-Wl,-search_paths_first',)
+                sqlite_extra_link_args = ()
             else:
                 sqlite_extra_link_args = ()
 
@@ -1422,7 +1440,7 @@ class PyBuildExt(build_ext):
             if version >= version_req:
                 if (self.compiler.find_library_file(lib_dirs, 'z')):
                     if host_platform == "darwin":
-                        zlib_extra_link_args = ('-Wl,-search_paths_first',)
+                        zlib_extra_link_args = ()
                     else:
                         zlib_extra_link_args = ()
                     exts.append( Extension('zlib', ['zlibmodule.c'],
@@ -1454,7 +1472,7 @@ class PyBuildExt(build_ext):
         # Gustavo Niemeyer's bz2 module.
         if (self.compiler.find_library_file(lib_dirs, 'bz2')):
             if host_platform == "darwin":
-                bz2_extra_link_args = ('-Wl,-search_paths_first',)
+                bz2_extra_link_args = ()
             else:
                 bz2_extra_link_args = ()
             exts.append( Extension('bz2', ['bz2module.c'],
@@ -1542,11 +1560,11 @@ class PyBuildExt(build_ext):
                 missing.append('_codecs_%s' % loc)
 
         # Dynamic loading module
-        if sys.maxint == 0x7fffffff:
+        if True:
             # This requires sizeof(int) == sizeof(long) == sizeof(char*)
             dl_inc = find_file('dlfcn.h', [], inc_dirs)
             if (dl_inc is not None) and (host_platform not in ['atheos']):
-                exts.append( Extension('dl', ['dlmodule.c']) )
+                exts.append( Extension('dl', ['dlmodule.c'], extra_compile_args = ['-no64'], extra_link_args = ['-no64']) )
             else:
                 missing.append('dl')
         else:
@@ -1700,7 +1718,10 @@ class PyBuildExt(build_ext):
             carbon_kwds = {'extra_compile_args': carbon_extra_compile_args,
                            'extra_link_args': ['-framework', 'Carbon'],
                           }
-            CARBON_EXTS = ['ColorPicker', 'gestalt', 'MacOS', 'Nav',
+            carbon_kwds32 = {'extra_compile_args': carbon_extra_compile_args + ['-no64'],
+                           'extra_link_args': ['-framework', 'Carbon', '-no64'],
+                          }
+            CARBON_EXTS = ['ColorPicker', 'gestalt', 'MacOS',
                            'OSATerminology', 'icglue',
                            # All these are in subdirs
                            '_AE', '_AH', '_App', '_CarbonEvt', '_Cm', '_Ctl',
@@ -1709,20 +1730,23 @@ class PyBuildExt(build_ext):
                            '_Menu', '_Mlte', '_OSA', '_Res', '_Qd', '_Qdoffs',
                            '_Scrap', '_Snd', '_TE',
                           ]
+            CARBON_EXTS32 = ['Nav', '_Win']
             for name in CARBON_EXTS:
                 addMacExtension(name, carbon_kwds)
+            for name in CARBON_EXTS32:
+                addMacExtension(name, carbon_kwds32)
 
-            # Workaround for a bug in the version of gcc shipped with Xcode 3.
-            # The _Win extension should build just like the other Carbon extensions, but
-            # this actually results in a hard crash of the linker.
-            #
-            if '-arch ppc64' in cflags and '-arch ppc' in cflags:
-                win_kwds = {'extra_compile_args': carbon_extra_compile_args + ['-arch', 'i386', '-arch', 'ppc'],
-                               'extra_link_args': ['-framework', 'Carbon', '-arch', 'i386', '-arch', 'ppc'],
-                           }
-                addMacExtension('_Win', win_kwds)
-            else:
-                addMacExtension('_Win', carbon_kwds)
+#            # Workaround for a bug in the version of gcc shipped with Xcode 3.
+#            # The _Win extension should build just like the other Carbon extensions, but
+#            # this actually results in a hard crash of the linker.
+#            #
+#            if '-arch ppc64' in cflags and '-arch ppc' in cflags:
+#                win_kwds = {'extra_compile_args': carbon_extra_compile_args + ['-arch', 'i386', '-arch', 'ppc'],
+#                               'extra_link_args': ['-framework', 'Carbon', '-arch', 'i386', '-arch', 'ppc'],
+#                           }
+#                addMacExtension('_Win', win_kwds)
+#            else:
+#                addMacExtension('_Win', carbon_kwds)
 
 
             # Application Services & QuickTime
@@ -1733,9 +1757,9 @@ class PyBuildExt(build_ext):
             addMacExtension('_CG', app_kwds)
 
             exts.append( Extension('_Qt', ['qt/_Qtmodule.c'],
-                        extra_compile_args=carbon_extra_compile_args,
+                        extra_compile_args=carbon_extra_compile_args + ['-no64'],
                         extra_link_args=['-framework', 'QuickTime',
-                                     '-framework', 'Carbon']) )
+                                     '-framework', 'Carbon', '-no64']) )
 
 
         self.extensions.extend(exts)
@@ -1808,7 +1832,8 @@ class PyBuildExt(build_ext):
 
             for fw in 'Tcl', 'Tk':
                 if is_macosx_sdk_path(F):
-                    if not exists(join(sysroot, F[1:], fw + '.framework')):
+                    F = join(sysroot, F[1:])
+                    if not exists(join(F, fw + '.framework')):
                         break
                 else:
                     if not exists(join(F, fw + '.framework')):
@@ -1835,29 +1860,29 @@ class PyBuildExt(build_ext):
         # For 8.4a2, the X11 headers are not included. Rather than include a
         # complicated search, this is a hard-coded path. It could bail out
         # if X11 libs are not found...
-        include_dirs.append('/usr/X11R6/include')
+#        include_dirs.append('/usr/X11R6/include')
         frameworks = ['-framework', 'Tcl', '-framework', 'Tk']
 
-        # All existing framework builds of Tcl/Tk don't support 64-bit
-        # architectures.
-        cflags = sysconfig.get_config_vars('CFLAGS')[0]
-        archs = re.findall('-arch\s+(\w+)', cflags)
-
-        if is_macosx_sdk_path(F):
-            fp = os.popen("file %s/Tk.framework/Tk | grep 'for architecture'"%(os.path.join(sysroot, F[1:]),))
-        else:
-            fp = os.popen("file %s/Tk.framework/Tk | grep 'for architecture'"%(F,))
-
-        detected_archs = []
-        for ln in fp:
-            a = ln.split()[-1]
-            if a in archs:
-                detected_archs.append(ln.split()[-1])
-        fp.close()
-
-        for a in detected_archs:
-            frameworks.append('-arch')
-            frameworks.append(a)
+#        # All existing framework builds of Tcl/Tk don't support 64-bit
+#        # architectures.
+#        cflags = sysconfig.get_config_vars('CFLAGS')[0]
+#        archs = re.findall('-arch\s+(\w+)', cflags)
+#
+#        if is_macosx_sdk_path(F):
+#            fp = os.popen("file %s/Tk.framework/Tk | grep 'for architecture'"%(os.path.join(sysroot, F[1:]),))
+#        else:
+#            fp = os.popen("file %s/Tk.framework/Tk | grep 'for architecture'"%(F,))
+#
+#        detected_archs = []
+#        for ln in fp:
+#            a = ln.split()[-1]
+#            if a in archs:
+#                detected_archs.append(ln.split()[-1])
+#        fp.close()
+#
+#        for a in detected_archs:
+#            frameworks.append('-arch')
+#            frameworks.append(a)
 
         ext = Extension('_tkinter', ['_tkinter.c', 'tkappinit.c'],
                         define_macros=[('WITH_APPINIT', 1)],
@@ -1930,21 +1955,21 @@ class PyBuildExt(build_ext):
             if dir not in include_dirs:
                 include_dirs.append(dir)
 
-        # Check for various platform-specific directories
-        if host_platform == 'sunos5':
-            include_dirs.append('/usr/openwin/include')
-            added_lib_dirs.append('/usr/openwin/lib')
-        elif os.path.exists('/usr/X11R6/include'):
-            include_dirs.append('/usr/X11R6/include')
-            added_lib_dirs.append('/usr/X11R6/lib64')
-            added_lib_dirs.append('/usr/X11R6/lib')
-        elif os.path.exists('/usr/X11R5/include'):
-            include_dirs.append('/usr/X11R5/include')
-            added_lib_dirs.append('/usr/X11R5/lib')
-        else:
-            # Assume default location for X11
-            include_dirs.append('/usr/X11/include')
-            added_lib_dirs.append('/usr/X11/lib')
+#        # Check for various platform-specific directories
+#        if host_platform == 'sunos5':
+#            include_dirs.append('/usr/openwin/include')
+#            added_lib_dirs.append('/usr/openwin/lib')
+#        elif os.path.exists('/usr/X11R6/include'):
+#            include_dirs.append('/usr/X11R6/include')
+#            added_lib_dirs.append('/usr/X11R6/lib64')
+#            added_lib_dirs.append('/usr/X11R6/lib')
+#        elif os.path.exists('/usr/X11R5/include'):
+#            include_dirs.append('/usr/X11R5/include')
+#            added_lib_dirs.append('/usr/X11R5/lib')
+#        else:
+#            # Assume default location for X11
+#            include_dirs.append('/usr/X11/include')
+#            added_lib_dirs.append('/usr/X11/lib')
 
         # If Cygwin, then verify that X is installed before proceeding
         if host_platform == 'cygwin':
@@ -2082,7 +2107,7 @@ class PyBuildExt(build_ext):
         depends = ['_ctypes/ctypes.h']
 
         if host_platform == 'darwin':
-            sources.append('_ctypes/malloc_closure.c')
+#            sources.append('_ctypes/malloc_closure.c')
             sources.append('_ctypes/darwin/dlfcn_simple.c')
             extra_compile_args.append('-DMACOSX')
             include_dirs.append('_ctypes/darwin')
