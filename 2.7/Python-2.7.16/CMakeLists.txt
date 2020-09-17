@@ -204,7 +204,7 @@ set_target_properties(python27exe PROPERTIES OUTPUT_NAME python2.7)
 make_fat(python27exe)
 
 install(TARGETS python27exe DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/bin)
-install(FILES python2.7 DESTINATION libexec/darling/usr/bin)
+InstallSymlink("../../System/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7" "${CMAKE_INSTALL_PREFIX}/libexec/darling/usr/bin/python2.7")
 
 versioner(python "2.7" "2.7")
 
