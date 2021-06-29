@@ -79,7 +79,7 @@ set(python_sources
 	Python/graminit.c
 	Python/import.c
 	Python/importdl.c
-	#Python/mactoolboxglue.c # missing some stuff in Carbon
+	Python/mactoolboxglue.c
 	Python/marshal.c
 	Python/modsupport.c
 	Python/mysnprintf.c
@@ -541,6 +541,7 @@ install_lib(xml/dom)
 install_lib(xml/etree)
 install_lib(xml/parsers)
 install_lib(xml/sax)
+install_lib(unittest)
 
 pyc(py27_sysconfigdata SOURCES _sysconfigdata.py DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7)
 install(FILES _sysconfigdata.py DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/)
@@ -552,3 +553,6 @@ set(EXENAME "/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Misc/python-config.in python-config)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/python-config DESTINATION libexec/darling/usr/bin RENAME python2.7-config)
 
+InstallSymlink("include/python2.7" "${CMAKE_INSTALL_PREFIX}/libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/Headers")
+install(DIRECTORY Include/ DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7)
+install(FILES pyconfig.h DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7)
