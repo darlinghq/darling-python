@@ -190,6 +190,8 @@ add_framework(Python
 	VERSION "2.7"
 	DEPENDENCIES
 		system
+	RESOURCES
+		Info.plist Mac/Resources/framework/Info.plist
 )
 unset(DYLIB_COMPAT_VERSION)
 unset(DYLIB_CURRENT_VERSION)
@@ -198,7 +200,9 @@ include(darling_exe)
 include(InstallSymlink)
 include(versioner)
 
-add_darling_executable(python27exe Modules/python.c)
+add_darling_object_library(python27exe_obj Modules/python.c)
+
+add_darling_executable(python27exe $<TARGET_OBJECTS:python27exe_obj> dummy.c)
 target_link_libraries(python27exe system Python_2.7)
 set_target_properties(python27exe PROPERTIES OUTPUT_NAME python2.7)
 make_fat(python27exe)
@@ -556,3 +560,26 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/python-config DESTINATION libexec/d
 InstallSymlink("include/python2.7" "${CMAKE_INSTALL_PREFIX}/libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/Headers")
 install(DIRECTORY Include/ DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7)
 install(FILES pyconfig.h DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7)
+
+install(
+	FILES
+		Makefile
+		install-sh
+		Modules/Setup
+		Modules/Setup.config
+		Modules/Setup.local
+		Modules/config.c
+		Modules/config.c.in
+		Modules/makesetup
+	DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config
+)
+
+install(
+	# `python27exe_obj` should only contain a single object file
+	FILES $<TARGET_OBJECTS:python27exe_obj>
+	RENAME python.o
+	DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config
+)
+
+InstallSymlink("../../../Python" "libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config/libpython2.7.a")
+InstallSymlink("../../../Python" "libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config/libpython2.7.dylib")
