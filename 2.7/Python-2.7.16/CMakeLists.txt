@@ -581,5 +581,5 @@ install(
 	DESTINATION libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config
 )
 
-InstallSymlink("../../../Python" "libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config/libpython2.7.a")
-InstallSymlink("../../../Python" "libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config/libpython2.7.dylib")
+InstallSymlink("../../../Python" "${CMAKE_INSTALL_PREFIX}/libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config/libpython2.7.a")
+InstallSymlink("../../../Python" "${CMAKE_INSTALL_PREFIX}/libexec/darling/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config/libpython2.7.dylib")
