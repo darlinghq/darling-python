@@ -17,16 +17,21 @@
 #endif
 /* Workaround */
 
-#if __has_include(<Availability.h>)
+// this path is disabled in Darling because Apple's SDK does the same
+// (well, they actually replace the macro directly with `!__LP64__`)
+#if __has_include(<Availability.h>) && !defined(DARLING)
 #include <Availability.h>
 #define APPLE_SUPPORTS_QUICKTIME (__MAC_OS_X_VERSION_MAX_ALLOWED < 101200) && !__LP64__
 #else
 #define APPLE_SUPPORTS_QUICKTIME !__LP64__
 #endif
 
+// this is also disabled in Darling for the same reason (not enabled in Apple's SDK)
+#ifndef DARLING
 #if APPLE_SUPPORTS_QUICKTIME
 #include <QuickTime/QuickTime.h>
 #endif /* APPLE_SUPPORTS_QUICKTIME */
+#endif
 
 /*
 ** Helper routines for error codes and such.
@@ -171,6 +176,8 @@ extern int GWorldObj_Convert(PyObject *, GWorldPtr *);
 #endif /* APPLE_SUPPORTS_QUICKTIME */
 
 /* Qt exports */
+// disabled for Darling because Apple's SDK disables it too
+#ifndef DARLING
 #if APPLE_SUPPORTS_QUICKTIME
 extern PyObject *TrackObj_New(Track);
 extern int TrackObj_Convert(PyObject *, Track *);
@@ -185,6 +192,7 @@ extern int UserDataObj_Convert(PyObject *, UserData *);
 extern PyObject *MediaObj_New(Media);
 extern int MediaObj_Convert(PyObject *, Media *);
 #endif /* APPLE_SUPPORTS_QUICKTIME */
+#endif
 
 /* Res exports */
 extern PyObject *ResObj_New(Handle);

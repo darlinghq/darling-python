@@ -26,8 +26,10 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "Python.h"
 #include "pymactoolbox.h"
 #include <arpa/inet.h>  /* for ntohl, htonl */
+#ifndef DARLING
 #ifndef __LP64__
 #include <QuickTime/QuickTime.h>
+#endif
 #endif
 
 
@@ -422,6 +424,8 @@ GLUE_CONVERT(RGBColor, QdRGB_Convert, "Carbon.Qd")
 GLUE_NEW(GWorldPtr, GWorldObj_New, "Carbon.Qdoffs")
 GLUE_CONVERT(GWorldPtr, GWorldObj_Convert, "Carbon.Qdoffs")
 
+// again, see the header
+#ifndef DARLING
 #if APPLE_SUPPORTS_QUICKTIME
 GLUE_NEW(Track, TrackObj_New, "Carbon.Qt")
 GLUE_CONVERT(Track, TrackObj_Convert, "Carbon.Qt")
@@ -436,6 +440,7 @@ GLUE_CONVERT(UserData, UserDataObj_Convert, "Carbon.Qt")
 GLUE_NEW(Media, MediaObj_New, "Carbon.Qt")
 GLUE_CONVERT(Media, MediaObj_Convert, "Carbon.Qt")
 #endif /* APPLE_SUPPORTS_QUICKTIME */
+#endif
 
 GLUE_NEW(Handle, ResObj_New, "Carbon.Res")
 GLUE_CONVERT(Handle, ResObj_Convert, "Carbon.Res")
