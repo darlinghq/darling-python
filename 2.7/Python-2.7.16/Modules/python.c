@@ -8,6 +8,9 @@
 #include <libproc.h>
 #include <sys/proc.h>
 #include <sys/proc_info.h>
+#ifdef DARLING
+#include <err.h>
+#endif
 
 const char *pswhitelist[] = {
 "/bin/",
