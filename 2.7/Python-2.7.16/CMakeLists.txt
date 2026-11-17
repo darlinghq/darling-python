@@ -437,6 +437,8 @@ pymodule(_hashlib
 	Modules/_hashopenssl.c
 )
 target_link_libraries(py27__hashlib ssl46 crypto44)
+# linked against the LibreSSL 2.8.3 libraries, so use their headers
+target_include_directories(py27__hashlib BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/external/libressl-2.8.3/include)
 
 pymodule(_heapq
 	Modules/_heapqmodule.c
@@ -479,6 +481,8 @@ pymodule(_ssl
 	Modules/_ssl.c
 )
 target_link_libraries(py27__ssl ssl46 crypto44)
+# linked against the LibreSSL 2.8.3 libraries, so use their headers
+target_include_directories(py27__ssl BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/external/libressl-2.8.3/include)
 
 pymodule(_struct
 	Modules/_struct.c
